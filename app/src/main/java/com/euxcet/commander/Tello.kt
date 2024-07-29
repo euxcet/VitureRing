@@ -20,7 +20,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
-class Tello {
+class Tello() {
     companion object {
         const val LOCAL_ADDRESS = "0.0.0.0"
         const val LOCAL_COMMAND_PORT = 9000
@@ -35,17 +35,22 @@ class Tello {
     private lateinit var telloSocket: BoundDatagramSocket
     private lateinit var videoSocket: BoundDatagramSocket
     private var connected: Boolean = false
+    private var disableCommand: Boolean = false
 
-    fun connect(surface: Surface) {
+    fun connect(surface: Surface, disableCommand: Boolean = false) {
+        this.disableCommand = disableCommand
         CoroutineScope(Dispatchers.Default).launch {
             Log.e("Test", "start")
             val selectorManager = SelectorManager(Dispatchers.Default)
-            telloSocket = aSocket(selectorManager).udp().bind(InetSocketAddress(LOCAL_ADDRESS, LOCAL_COMMAND_PORT))
             videoSocket = aSocket(selectorManager).udp().bind(InetSocketAddress(LOCAL_ADDRESS, LOCAL_VIDEO_PORT))
-            sendAction("command")
-            sendAction("battery?")
-            sendAction("streamon")
-            connected = true
+            if (!disableCommand) {
+                Log.e("Test", "SendAction")
+                telloSocket = aSocket(selectorManager).udp().bind(InetSocketAddress(LOCAL_ADDRESS, LOCAL_COMMAND_PORT))
+                connected = true
+                sendAction("command")
+                sendAction("battery?")
+                sendAction("streamon")
+            }
             val mediaCodec = MediaCodec.createDecoderByType("video/avc")
             val mediaFormat = MediaFormat.createVideoFormat("video/avc", FRAME_WIDTH, FRAME_HEIGHT)
             mediaFormat.setInteger(MediaFormat.KEY_FRAME_RATE, FRAME_RATE)
@@ -58,7 +63,6 @@ class Tello {
                     val newBytes = packet.packet.readBytes()
                     bytes += newBytes
                     val totalSize = bytes.size
-                    Log.e("Test", "${bytes.size} ${newBytes.size}")
                     while (true) {
                         if (totalSize == 0) {
                             break
@@ -99,6 +103,9 @@ class Tello {
     }
 
     private suspend fun sendAction(action: String, waitResponse: Boolean = true): String {
+        if (!connected || disableCommand) {
+            return NO_RESPONSE
+        }
         telloSocket.send(Datagram(
             ByteReadPacket(action.encodeToByteArray()),
             InetSocketAddress(DEVICE_ADDRESS, DEVICE_PORT)
@@ -113,9 +120,6 @@ class Tello {
     }
 
     fun performAction(action: String) {
-        if (!connected) {
-            return
-        }
         CoroutineScope(Dispatchers.Default).launch {
             sendAction(action)
         }
