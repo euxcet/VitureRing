@@ -44,12 +44,16 @@ class EyeTracker(
     }
 
     private val eyeDataCallback = object : EyeDataCallback {
-        fun logPoint(point: Point3D) {
-            Log.e("Test", "${point.x} ${point.y} ${point.z}")
+        fun logPoint(point: Point3D, prefix: String = "") {
+            Log.e("Test", "$prefix ${point.x} ${point.y} ${point.z}")
         }
 
         override fun onEyeData(eyeData: EyeData) {
-            logPoint(eyeData.leftGaze.rawPoint)
+            if (eyeData.leftGaze.gazePoint.x > 0.001f) {
+                logPoint(eyeData.leftGaze.gazePoint, "gaze")
+                logPoint(eyeData.leftGaze.rawPoint, "raw")
+                logPoint(eyeData.leftGaze.smoothPoint, "smooth")
+            }
             commander.newEyeData(eyeData)
         }
     }

@@ -15,3 +15,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Commander"
 include(":app")
+include(":producer")

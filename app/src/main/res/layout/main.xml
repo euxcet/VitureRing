@@ -17,6 +17,7 @@
         android:textSize="20sp" />
 
     <LinearLayout
+        android:id="@+id/surfaceLayout"
         android:layout_width="1440px"
         android:layout_height="match_parent"
         android:layout_marginLeft="389px"

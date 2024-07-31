@@ -84,6 +84,12 @@ class Tello() {
                         bytes = bytes.drop(nextFrameStart).toByteArray()
                         val outIndex = mediaCodec.dequeueOutputBuffer(info, 1000)
                         if (outIndex >= 0) {
+//                            val outputImage = mediaCodec.getOutputImage(outIndex)
+//                            if (outputImage != null) {
+//                                Log.e("Test", "Image ${outputImage.width} ${outputImage.height}")
+//                            }
+//                            val bitmap = yuvImage2Bitmap(outputImage!!)
+//                            Log.e("Test", "Bitmap ${bitmap.width} ${bitmap.height}")
                             mediaCodec.releaseOutputBuffer(outIndex, true)
                         }
                     }
