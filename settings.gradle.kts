@@ -13,6 +13,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Commander"
+rootProject.name = "VitureRing"
 include(":app")
 include(":producer")

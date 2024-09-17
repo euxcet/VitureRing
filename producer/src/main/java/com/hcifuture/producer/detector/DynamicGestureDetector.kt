@@ -1,15 +1,15 @@
 package com.hcifuture.producer.detector
 
 import android.content.res.AssetManager
+import android.util.Log
 import com.hcifuture.producer.sensor.NuixSensorManager
-import com.hcifuture.producer.sensor.data.RingV1ImuData
-import com.hcifuture.producer.sensor.data.RingV1TouchData
-import com.hcifuture.producer.sensor.external.ringV1.RingV1Spec
+import com.hcifuture.producer.sensor.data.RingImuData
+import com.hcifuture.producer.sensor.external.ring.RingSpec
+import com.hcifuture.producer.sensor.external.ring.ringV1.RingV1Spec
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.pytorch.IValue
 import org.pytorch.LiteModuleLoader
@@ -28,18 +28,28 @@ class DynamicGestureDetector @Inject constructor(
         "negative", "negative", "negative", "negative",
         "negative", "negative", "negative", "negative")
     private var lastTriggerTimestamp = LongArray(20) { 0L }
-    private val minTriggerInterval = 200L
+    private val minTriggerInterval = 500L
     private var lastGesture = -1
     private var lastGestureCount = 0
     private var lastTrigger = 0L
     private val calculateFrequency: Float = 20.0f
+    private var gestureOccur = false
 
     private val data = Array(6) { FloatArray(200) { 0.0f } }
+    private var count = 0
 
     fun start() {
         scope.launch {
-            nuixSensorManager.defaultRingV1.getFlow<RingV1ImuData>(
-                RingV1Spec.imuFlowName(nuixSensorManager.defaultRingV1)
+            while (true) {
+                Log.e("Nuix", "Gesture fps: ${count / 2}")
+                count = 0
+                delay(2000)
+            }
+        }
+
+        scope.launch {
+            nuixSensorManager.defaultRing.getProxyFlow<RingImuData>(
+                RingSpec.imuFlowName(nuixSensorManager.defaultRing)
             )?.collect { imu ->
                 for (i in 0 until 6) {
                     data[i].copyInto(data[i], 0, 1, data[i].size)
@@ -52,6 +62,7 @@ class DynamicGestureDetector @Inject constructor(
             val model = LiteModuleLoader.loadModuleFromAsset(assetManager, "dynamic.ptl")
             while (true) {
                 delay((1000.0f / calculateFrequency).toLong())
+                count += 1
                 val tensor = Tensor.fromBlob(
                     data.flatMap{ it.toList() }.toFloatArray(),
                     longArrayOf(1, 6, 1, 200)
@@ -71,15 +82,19 @@ class DynamicGestureDetector @Inject constructor(
                 }
                 if (softmax[result] > 0.98 &&
                     !labels[result].contains("negative") &&
-                    lastGestureCount >= 3 &&
-                    currentTimestamp > lastTrigger + minTriggerInterval &&
-                    currentTimestamp > lastTriggerTimestamp[result] + minTriggerInterval) {
-                    eventFlow.emit(labels[result])
-                    lastTriggerTimestamp[result] = currentTimestamp
-                    lastTrigger = currentTimestamp
+                    lastGestureCount >= 3) {
+                    Log.e("Nuix", labels[result])
+                    if (currentTimestamp > lastTrigger + minTriggerInterval &&
+                        currentTimestamp > lastTriggerTimestamp[result] + 500L) {
+                        eventFlow.emit(labels[result])
+                        lastTriggerTimestamp[result] = currentTimestamp
+                        lastTrigger = currentTimestamp
+                        gestureOccur = true
+                    }
                 }
-                if (currentTimestamp > lastTrigger + 2000) {
-                    eventFlow.emit("无")
+                if (currentTimestamp > lastTrigger + 3000 && gestureOccur) {
+                    gestureOccur = false
+                    eventFlow.emit("")
                 }
             }
         }

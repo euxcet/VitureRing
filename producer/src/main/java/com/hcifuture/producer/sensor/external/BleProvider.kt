@@ -1,15 +1,19 @@
 package com.hcifuture.producer.sensor.external
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.pm.PackageManager
 import android.util.Log
+import androidx.core.content.ContextCompat
 import com.hcifuture.producer.sensor.NuixSensor
 import com.hcifuture.producer.sensor.NuixSensorProvider
-import com.hcifuture.producer.sensor.external.ringV1.RingV1
-import com.hcifuture.producer.sensor.external.ringV2.RingV2
+import com.hcifuture.producer.sensor.external.ring.ringV1.RingV1
+import com.hcifuture.producer.sensor.external.ring.ringV2.RingV2
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.forEach
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -29,8 +33,12 @@ class BleProvider @Inject constructor(
 
     @SuppressLint("MissingPermission")
     override fun scan(): Flow<List<NuixSensor>> {
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_SCAN)
+                == PackageManager.PERMISSION_DENIED) {
+            return flowOf()
+        }
         val aggregator = BleScanResultAggregator()
-        Log.e("BleProvider", "Scanning")
+        Log.e("Nuix", "Scanning")
         return BleScanner(context).scan()
             .filter {
                 (it.device.name?:"").startsWith("BCL") ||
@@ -39,10 +47,10 @@ class BleProvider @Inject constructor(
             .map { aggregator.aggregateDevices(it) }
             .map {
                 it.map { device ->
+                    Log.e("Nuix", "Ring found: ${device.name}, address: ${device.address}")
                     if (device.name?.contains("Ring") == true) {
                         RingV1(context, device.name ?: "RingV1 Unnamed", device.address)
                     } else {
-                        Log.e("BleProvider", "RingV2 found: ${device.name}, address: ${device.address}")
                         RingV2(context, device.name ?: "RingV2 Unnamed", device.address)
                     }
                 }

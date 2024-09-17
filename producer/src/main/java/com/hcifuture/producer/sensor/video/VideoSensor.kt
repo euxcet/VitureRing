@@ -14,11 +14,8 @@ import com.hcifuture.producer.sensor.NuixSensorSpec
 import com.hcifuture.producer.sensor.NuixSensorState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 import java.io.File
 
 class VideoSensor(val context: Context): NuixSensor() {
@@ -50,7 +47,7 @@ class VideoSensor(val context: Context): NuixSensor() {
         width: Int,
         height: Int,
     ) {
-        if (status !in listOf(NuixSensorState.SCANNED, NuixSensorState.DISCONNECTED)) {
+        if (status !in listOf(NuixSensorState.SCANNING, NuixSensorState.DISCONNECTED)) {
             return
         }
         status = NuixSensorState.CONNECTING

@@ -7,11 +7,11 @@ import com.hcifuture.producer.common.utils.FunctionUtils.reifiedValue
 import com.hcifuture.producer.sensor.audio.AudioProvider
 import com.hcifuture.producer.sensor.audio.AudioSensor
 import com.hcifuture.producer.sensor.external.BleProvider
-import com.hcifuture.producer.sensor.external.ringV1.RingV1
+import com.hcifuture.producer.sensor.external.ring.ringV1.RingV1
 import com.hcifuture.producer.sensor.video.VideoProvider
-import com.hcifuture.producer.sensor.external.ringV1.RingV1Provider
-import com.hcifuture.producer.sensor.external.ringV2.RingV2
-import com.hcifuture.producer.sensor.external.ringV2.RingV2Provider
+import com.hcifuture.producer.sensor.external.ring.ringV1.RingV1Provider
+import com.hcifuture.producer.sensor.external.ring.ringV2.RingV2
+import com.hcifuture.producer.sensor.external.ring.ringV2.RingV2Provider
 import com.hcifuture.producer.sensor.internal.InternalSensor
 import com.hcifuture.producer.sensor.internal.InternalSensorProvider
 import com.hcifuture.producer.sensor.location.LocationProvider
@@ -109,7 +109,11 @@ class NuixSensorManager @Inject constructor(
     /**
      * The default ring will be switched automatically when the target ring change.
      */
-    var defaultRingV1: NuixSensorProxy = NuixSensorProxy("DefaultRing", null)
+    var defaultRing: NuixSensorProxy = NuixSensorProxy("DefaultRing", null)
+    private fun defaultRing(): NuixSensor?
+        = defaultRingV1()
+//        = if (defaultRingV2() != null) { defaultRingV2() } else { defaultRingV1() }
+    var defaultRingV1: NuixSensorProxy = NuixSensorProxy("DefaultRingV1", null)
     private fun defaultRingV1(): NuixSensor?
         = ringV1s().find { it.status == NuixSensorState.CONNECTED }
             ?: ringV1s().find { it.status == NuixSensorState.CONNECTING }
@@ -128,6 +132,7 @@ class NuixSensorManager @Inject constructor(
         _sensors[provider] ?:
             throw NoSuchElementException("Attempt to add a sensor from an unknown provider.")
         if (_sensors[provider]?.find { it.name == sensor.name } == null) {
+            Log.e("Nuix", "New sensor ${sensor.name}")
             _sensors[provider]?.add(sensor)
             emitEvent(NuixSensorManagerEvent.CreateSensor(sensor))
         }
@@ -162,10 +167,11 @@ class NuixSensorManager @Inject constructor(
         return result
     }
 
-    fun refreshDefaultSensors() {
-        Log.e("Nuix", "refresh")
+    private fun refreshDefaultSensors() {
+        Log.e("Nuix", "Refresh default sensors")
         defaultRingV1.switchTarget(defaultRingV1())
         defaultRingV2.switchTarget(defaultRingV2())
+        defaultRing.switchTarget(defaultRing())
     }
 
     /**
@@ -179,7 +185,6 @@ class NuixSensorManager @Inject constructor(
         }
         _scanJob[provider] = scope.launch {
             provider.scan().collect { sensors ->
-                // TODO: remove invisible sensors.
                 sensors.forEach {
                     addSensor(provider, it)
                 }

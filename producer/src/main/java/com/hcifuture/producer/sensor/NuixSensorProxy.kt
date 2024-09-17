@@ -1,15 +1,13 @@
 package com.hcifuture.producer.sensor
 
+import com.hcifuture.producer.common.utils.FunctionUtils
 import com.hcifuture.producer.recorder.Collector
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 class NuixSensorProxy(
@@ -31,6 +29,17 @@ class NuixSensorProxy(
 
     override fun disconnect() {
         target?.disconnect()
+    }
+
+    override var status: NuixSensorState
+        get() = target?.status ?: NuixSensorState.SCANNING
+        set(value) {}
+
+    inline fun<reified T> getProxyFlow(name: String): Flow<T>? {
+        if (!flows.contains(name)) {
+            flows[name] = MutableSharedFlow()
+        }
+        return flows[name]?.map { v -> FunctionUtils.reifiedValue<T>(v) }
     }
 
     /**

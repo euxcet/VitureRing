@@ -20,9 +20,6 @@ import com.hcifuture.producer.sensor.data.LocationData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -100,7 +97,7 @@ class LocationSensor(val context: Context) : NuixSensor() {
 
     @SuppressLint("MissingPermission")
     override fun connect() {
-        if (status !in listOf(NuixSensorState.SCANNED, NuixSensorState.DISCONNECTED)) {
+        if (status !in listOf(NuixSensorState.SCANNING, NuixSensorState.DISCONNECTED)) {
             return
         }
         if (!hasLocationPermission() || !isLocationProviderEnabled()) {

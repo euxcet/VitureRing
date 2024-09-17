@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.euxcet.commander"
+    namespace = "com.euxcet.viturering"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.euxcet.commander"
+        applicationId = "com.euxcet.viturering"
         minSdk = 26
         targetSdk = 34
         versionCode = 1

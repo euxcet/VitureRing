@@ -1,7 +1,6 @@
 package com.hcifuture.producer.sensor
 
 import com.hcifuture.producer.common.utils.FunctionUtils
-import com.hcifuture.producer.sensor.data.RingV1ImuData
 
 class NuixSensorSpec {
     companion object {
