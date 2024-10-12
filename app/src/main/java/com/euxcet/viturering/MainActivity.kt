@@ -16,6 +16,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.view.children
 import com.euxcet.viturering.utils.LanguageUtils
 import com.euxcet.viturering.utils.Permission
+import com.hcifuture.producer.sensor.NuixSensor
 import com.hcifuture.producer.sensor.data.RingTouchEvent
 import com.hcifuture.producer.sensor.external.ring.ringV2.RingV2
 import dagger.hilt.android.AndroidEntryPoint
@@ -48,7 +49,7 @@ class MainActivity : ComponentActivity() {
         connectRing()
     }
 
-    private fun createRingButton(ring: RingV2): Button {
+    private fun createRingButton(ring: NuixSensor): Button {
         val ringLayout = findViewById<LinearLayout>(R.id.ringLayout)
         val button = Button(this@MainActivity)
         button.text = ring.name
@@ -79,7 +80,7 @@ class MainActivity : ComponentActivity() {
             onConnectCallback { // Connect
                 runOnUiThread {
                     ringLayout.removeAllViews()
-                    for (ring in ringManager.ringV2s()) {
+                    for (ring in ringManager.rings()) {
                         ringLayout.addView(createRingButton(ring))
                     }
                 }
@@ -99,20 +100,9 @@ class MainActivity : ComponentActivity() {
                             val intent = Intent(Settings.ACTION_SETTINGS)
                             startActivity(intent)
                         }
-//                        "clap" -> {
-//                            val intent = packageManager.getLaunchIntentForPackage(packageName)
-//                            intent?.let { it0 ->
-//                                it0.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-//                                startActivity(it0)
-//                            }
-//                        }
                         "circle_clockwise" -> {
                             val intent = Intent(this@MainActivity, ObjectActivity::class.java)
                             startActivity(intent)
-//                            val intent = Intent(Intent.ACTION_MAIN)
-//                            intent.addCategory(Intent.CATEGORY_HOME)
-//                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-//                            startActivity(intent)
                         }
                         "touch_ring" -> {
                             overlayView?.reset()

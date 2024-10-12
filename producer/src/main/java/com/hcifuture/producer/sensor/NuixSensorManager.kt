@@ -83,6 +83,17 @@ class NuixSensorManager @Inject constructor(
      */
     fun internalSensors(): List<InternalSensor>
         = sensors.getValue(internalSensorProvider).map { it as InternalSensor }
+
+    fun rings(): List<NuixSensor> {
+        val rings = mutableListOf<NuixSensor>()
+        for (ring in ringV1s()) {
+            rings.add(ring)
+        }
+        for (ring in ringV2s()) {
+            rings.add(ring)
+        }
+        return rings
+    }
     fun ringV1s(): List<RingV1>
         = sensors.getValue(bleProvider)
             .filterIsInstance<RingV1>()
@@ -105,8 +116,7 @@ class NuixSensorManager @Inject constructor(
      */
     var defaultRing: NuixSensorProxy = NuixSensorProxy("DefaultRing", null)
     private fun defaultRing(): NuixSensor?
-        = defaultRingV2()
-//        = if (defaultRingV2() != null) { defaultRingV2() } else { defaultRingV1() }
+        = if (defaultRingV2() != null) { defaultRingV2() } else { defaultRingV1() }
     var defaultRingV1: NuixSensorProxy = NuixSensorProxy("DefaultRingV1", null)
     private fun defaultRingV1(): NuixSensor?
         = ringV1s().find { it.status == NuixSensorState.CONNECTED }

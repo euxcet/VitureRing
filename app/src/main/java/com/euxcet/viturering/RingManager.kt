@@ -28,7 +28,7 @@ class RingManager @Inject constructor(
         internal var moveCallback: ((Pair<Float, Float>) -> Unit)? = null
         internal var gestureCallback: ((String) -> Unit)? = null
         internal var stateCallback: ((NuixSensorState) -> Unit)? = null
-        internal var connectCallback: ((List<RingV2>) -> Unit)? = null
+        internal var connectCallback: ((List<NuixSensor>) -> Unit)? = null
 
         fun onTouchCallback(callback: ((RingTouchData) -> Unit)) {
             touchCallback = callback
@@ -46,7 +46,7 @@ class RingManager @Inject constructor(
             stateCallback = callback
         }
 
-        fun onConnectCallback(callback: ((List<RingV2>) -> Unit)) {
+        fun onConnectCallback(callback: ((List<NuixSensor>) -> Unit)) {
             connectCallback = callback
         }
     }
@@ -70,6 +70,10 @@ class RingManager @Inject constructor(
         return ring.name == selectedRingName
     }
 
+    fun rings(): List<NuixSensor> {
+        return nuixSensorManager.rings()
+    }
+
     fun ringV1s(): List<RingV1> {
         return nuixSensorManager.ringV1s()
     }
@@ -81,7 +85,7 @@ class RingManager @Inject constructor(
     fun connect() {
         if (connected) {
             if (::listener.isInitialized) {
-                listener.connectCallback?.invoke(nuixSensorManager.ringV2s())
+                listener.connectCallback?.invoke(nuixSensorManager.rings())
             }
             return
         }
@@ -90,7 +94,7 @@ class RingManager @Inject constructor(
         CoroutineScope(Dispatchers.Default).launch {
             while (true) {
                 if (!nuixSensorManager.defaultRing.disconnectable()) {
-                    for (ring in nuixSensorManager.ringV2s()) {
+                    for (ring in nuixSensorManager.rings()) {
                         if (selectedRingName == null) {
                             selectedRingName = ring.name
                         }
@@ -98,10 +102,10 @@ class RingManager @Inject constructor(
                     }
                     nuixSensorManager.scanAll(timeout = 3000L)
                     if (::listener.isInitialized) {
-                        listener.connectCallback?.invoke(nuixSensorManager.ringV2s())
+                        listener.connectCallback?.invoke(nuixSensorManager.rings())
                     }
 
-                    for (ring in nuixSensorManager.ringV2s()) {
+                    for (ring in nuixSensorManager.rings()) {
                         if (ring.name == selectedRingName) {
                             ring.connect()
                             nuixSensorManager.defaultRing.switchTarget(ring)
