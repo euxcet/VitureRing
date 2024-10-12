@@ -86,6 +86,12 @@ class OverlayView(context: Context) : View(context) {
                 color = Color.WHITE,
             )
         )
+        CoroutineScope(Dispatchers.Default).launch {
+            while (true) {
+                postInvalidate()
+                delay(30)
+            }
+        }
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -133,6 +139,8 @@ class OverlayView(context: Context) : View(context) {
             OverlayMode.MOVE -> {
                 cursorX += x
                 cursorY += y
+                cursorX = max(min(cursorX, 1500f), 0f)
+                cursorY = max(min(cursorY, 1000f), 0f)
                 for (obj in objects) {
                     if (obj.selected) {
                         obj.x += x

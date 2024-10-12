@@ -1,6 +1,7 @@
 package com.hcifuture.producer.sensor.external.ring.ringV2
 
 import android.annotation.SuppressLint
+import android.bluetooth.BluetoothGatt
 import android.content.Context
 import android.util.Log
 import com.hcifuture.producer.recorder.Collector
@@ -31,6 +32,7 @@ import kotlinx.coroutines.launch
 import no.nordicsemi.android.common.core.DataByteArray
 import no.nordicsemi.android.kotlin.ble.client.main.callback.ClientBleGatt
 import no.nordicsemi.android.kotlin.ble.client.main.service.ClientBleGattCharacteristic
+import no.nordicsemi.android.kotlin.ble.core.data.BleGattConnectionPriority
 import no.nordicsemi.android.kotlin.ble.core.data.BleWriteType
 import kotlin.experimental.and
 
@@ -44,7 +46,7 @@ class RingV2(
     private var buffer = ByteArray(0)
     private lateinit var readCharacteristic: ClientBleGattCharacteristic
     private lateinit var writeCharacteristic: ClientBleGattCharacteristic
-    private lateinit var connection: ClientBleGatt
+    private var connection: ClientBleGatt? = null
     private val _imuFlow = MutableSharedFlow<RingImuData>()
     private val _touchEventFlow = MutableSharedFlow<RingTouchData>()
     private val _touchRawFlow = MutableSharedFlow<RingV2TouchRawData>()
@@ -68,32 +70,35 @@ class RingV2(
     private var count = 0
     private lateinit var countJob: Job
     private lateinit var connectJob: Job
+    private var readJob: Job? = null
 
     override fun connect() {
         if (!connectable()) return
         status = NuixSensorState.CONNECTING
         countJob = scope.launch {
             while (true) {
-                Log.e("Nuix", "IMU fps: ${count / 2}")
-                if (count == 0 && status == NuixSensorState.CONNECTED) {
+                delay(5000)
+                if (count == 0) {
                     disconnect()
+                } else {
+                    Log.e("Nuix", "Ring fps: ${count / 5}")
+                    count = 0
                 }
-                count = 0
-                delay(2000)
             }
         }
         connectJob = scope.launch {
             try {
                 connection = ClientBleGatt.connect(context, address, scope)
-                connection.requestMtu(517)
-                if (!connection.isConnected) {
+                connection?.requestMtu(247)
+                if (!connection!!.isConnected) {
                     status = NuixSensorState.DISCONNECTED
                     return@launch
                 }
-                val service = connection.discoverServices().findService(RingV2Spec.SERVICE_UUID)!!
+
+                val service = connection!!.discoverServices().findService(RingV2Spec.SERVICE_UUID)!!
                 readCharacteristic = service.findCharacteristic(RingV2Spec.READ_CHARACTERISTIC_UUID)!!
                 writeCharacteristic = service.findCharacteristic(RingV2Spec.WRITE_CHARACTERISTIC_UUID)!!
-                readCharacteristic.getNotifications().onEach {
+                readJob = readCharacteristic.getNotifications().onEach {
                     val cmd = it.value[2]
                     val subCmd = it.value[3]
                     when {
@@ -181,7 +186,7 @@ class RingV2(
                                 event = RingTouchEvent.HOLD
                             }
                             if (event != null) {
-                                Log.e("RingV2", event.name)
+                                Log.e("Nuix", "TriggerGesture $it")
                                 _touchEventFlow.emit(
                                     RingTouchData(
                                         data = event,
@@ -220,6 +225,7 @@ class RingV2(
                 status = NuixSensorState.CONNECTED
             }
             catch (e: Exception) {
+                Log.e("Nuix", "Error $e")
                 disconnect()
                 return@launch
             }
@@ -228,7 +234,8 @@ class RingV2(
 
     override fun disconnect() {
         if (!disconnectable()) return
-        connection.disconnect()
+        Log.e("Nuix", "Manual disconnect")
+        connection?.disconnect()
         countJob.cancel()
         connectJob.cancel()
         status = NuixSensorState.DISCONNECTED
@@ -239,7 +246,7 @@ class RingV2(
             writeCharacteristic.write(DataByteArray(data), writeType = BleWriteType.NO_RESPONSE)
         }
         catch (e: Exception) {
-            Log.e("Test", e.toString())
+            Log.e("Nuix", "Error $e")
         }
         delay(50)
     }

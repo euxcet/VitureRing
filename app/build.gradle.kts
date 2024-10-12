@@ -40,6 +40,7 @@ android {
     }
     buildFeatures {
         compose = true
+        aidl = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
@@ -64,6 +65,9 @@ dependencies {
     implementation("io.ktor:ktor-network:2.3.12")
     implementation("io.ktor:ktor-network-tls:2.3.12")
     implementation("com.google.dagger:hilt-android:2.49")
+    implementation("androidx.appcompat:appcompat:1.7.0")
+    implementation("com.google.android.material:material:1.12.0")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     kapt("com.google.dagger:hilt-android-compiler:2.49")
     kapt("androidx.hilt:hilt-compiler:1.2.0")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")

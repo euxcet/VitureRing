@@ -3,40 +3,32 @@ package com.euxcet.viturering
 import android.Manifest
 import android.content.Intent
 import android.content.pm.ActivityInfo
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
-import android.util.Log
 import android.view.WindowManager
-import android.widget.RelativeLayout
+import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.ComponentActivity
 import androidx.annotation.RequiresApi
+import androidx.core.view.children
+import com.euxcet.viturering.utils.LanguageUtils
 import com.euxcet.viturering.utils.Permission
-import com.hcifuture.producer.detector.DynamicGestureDetector
-import com.hcifuture.producer.detector.GestureDetector
-import com.hcifuture.producer.detector.OrientationDetector
-import com.hcifuture.producer.sensor.NuixSensorManager
-import com.hcifuture.producer.sensor.NuixSensorState
-import com.hcifuture.producer.sensor.data.RingTouchData
 import com.hcifuture.producer.sensor.data.RingTouchEvent
-import com.hcifuture.producer.sensor.external.ring.RingSpec
+import com.hcifuture.producer.sensor.external.ring.ringV2.RingV2
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.Job
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     @Inject
-    lateinit var nuixSensorManager: NuixSensorManager
-    @Inject
-    lateinit var gestureDetector: GestureDetector
-    @Inject
-    lateinit var orientationDetector: OrientationDetector
+    lateinit var ringManager: RingManager
+
+    private var overlayView: OverlayView? = null
 
     @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,170 +44,110 @@ class MainActivity : ComponentActivity() {
             Manifest.permission.CAMERA,
             Manifest.permission.INTERNET,
         ))
-
         setContentView(R.layout.main)
+        connectRing()
+    }
 
+    private fun createRingButton(ring: RingV2): Button {
+        val ringLayout = findViewById<LinearLayout>(R.id.ringLayout)
+        val button = Button(this@MainActivity)
+        button.text = ring.name
+        if (ringManager.isActive(ring)) {
+            button.setBackgroundColor(Color.rgb(30, 150, 30))
+        } else {
+            button.setBackgroundColor(Color.rgb(220, 220, 220))
+        }
+        button.setOnClickListener {
+            for (child in ringLayout.children) {
+                if ((child as Button).text == ring.name) {
+                    child.setBackgroundColor(Color.rgb(30, 150, 30))
+                } else {
+                    child.setBackgroundColor(Color.rgb(220, 220, 220))
+                }
+            }
+            ringManager.selectRing(ring)
+        }
+        return button
+    }
+
+    private fun connectRing() {
         val touchView = findViewById<TextView>(R.id.touchView)
         val gestureView = findViewById<TextView>(R.id.gestureView)
         val statusView = findViewById<TextView>(R.id.statusView)
-
-        val layout = findViewById<RelativeLayout>(R.id.mainLayout)
-        val overlayView = OverlayView(this)
-        layout.addView(overlayView)
-
-        // Connect
-        CoroutineScope(Dispatchers.Default).launch {
-            while (true) {
-                if (!nuixSensorManager.defaultRing.disconnectable()) {
-                    nuixSensorManager.scanAll(timeout = 3000L)
-                    for (ring in nuixSensorManager.ringV1s()) {
-                        ring.connect()
-                        while (ring.status == NuixSensorState.CONNECTING) {
-                            delay(100)
-                        }
-                        break
+        val ringLayout = findViewById<LinearLayout>(R.id.ringLayout)
+        ringManager.registerListener {
+            onConnectCallback { // Connect
+                runOnUiThread {
+                    ringLayout.removeAllViews()
+                    for (ring in ringManager.ringV2s()) {
+                        ringLayout.addView(createRingButton(ring))
                     }
-                } else {
-                    delay(6000)
                 }
             }
-        }
-
-        // Touch
-        CoroutineScope(Dispatchers.Default).launch {
-            val ring = nuixSensorManager.defaultRing
-            ring.getProxyFlow<RingTouchData>(
-                RingSpec.touchEventFlowName(ring)
-            )?.collect { data ->
+            onGestureCallback { // Gesture
                 runOnUiThread {
-                    val event = data.data
-                    touchView.text = "触摸: ${touchChinese(event)}"
-                    when (event) {
+                    val gestureText = "手势: ${LanguageUtils.gestureChinese(it)}"
+                    gestureView.text = gestureText
+                    when (it) {
+                        "pinch" -> {
+                            overlayView?.select()
+                        }
+                        "middle_pinch" -> {
+                            overlayView?.switch()
+                        }
+                        "snap" -> {
+                            val intent = Intent(Settings.ACTION_SETTINGS)
+                            startActivity(intent)
+                        }
+//                        "clap" -> {
+//                            val intent = packageManager.getLaunchIntentForPackage(packageName)
+//                            intent?.let { it0 ->
+//                                it0.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+//                                startActivity(it0)
+//                            }
+//                        }
+                        "circle_clockwise" -> {
+                            val intent = Intent(this@MainActivity, ObjectActivity::class.java)
+                            startActivity(intent)
+//                            val intent = Intent(Intent.ACTION_MAIN)
+//                            intent.addCategory(Intent.CATEGORY_HOME)
+//                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+//                            startActivity(intent)
+                        }
+                        "touch_ring" -> {
+                            overlayView?.reset()
+                        }
+                    }
+                }
+            }
+            onMoveCallback { // Move
+                runOnUiThread {
+                    overlayView?.move(it.first, it.second)
+                }
+            }
+            onStateCallback { // State
+                runOnUiThread {
+                    val statusText = "连接状态: ${LanguageUtils.statusChinese(it)}"
+                    statusView.text = statusText
+                }
+            }
+            onTouchCallback { // Touch
+                runOnUiThread {
+                    val touchText = "触摸: ${(it.data)}"
+                    touchView.text = touchText
+                    when (it.data) {
                         RingTouchEvent.BOTTOM_BUTTON_CLICK -> {
-                            overlayView.reset()
+                            overlayView?.reset()
                         }
                         RingTouchEvent.TAP -> {
-                            overlayView.reset()
+                            overlayView?.reset()
                         }
                         else -> {}
                     }
                 }
             }
         }
-
-        // Move cursor
-        orientationDetector.start()
-        CoroutineScope(Dispatchers.Default).launch {
-            orientationDetector.eventFlow.collect {
-                runOnUiThread {
-                    overlayView.move(it.first, it.second)
-                }
-            }
-        }
-
-        // Gesture
-        gestureDetector.start()
-        CoroutineScope(Dispatchers.Default).launch {
-            gestureDetector.eventFlow.collect {
-                runOnUiThread {
-                    gestureView.text = "手势: ${gestureChinese(it)}"
-                    when (it) {
-                        "pinch" -> {
-                            overlayView.select()
-                        }
-                        "middle_pinch" -> {
-                            overlayView.switch()
-                        }
-                        "snap" -> {
-                            val intent = Intent(Settings.ACTION_SETTINGS)
-                            startActivity(intent)
-                        }
-                        "clap" -> {
-                            val intent = packageManager.getLaunchIntentForPackage(packageName)
-                            intent?.let {
-                                it.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                                startActivity(it)
-                            }
-                        }
-                        "circle_clockwise" -> {
-                            val intent = Intent(Intent.ACTION_MAIN)
-                            intent.addCategory(Intent.CATEGORY_HOME)
-                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                            startActivity(intent)
-                        }
-                        "touch_ring" -> {
-                            overlayView.reset()
-                        }
-                    }
-                }
-            }
-        }
-
-
-        CoroutineScope(Dispatchers.Default).launch {
-            val ring = nuixSensorManager.defaultRing
-            while (true) {
-                runOnUiThread {
-                    statusView.text = "连接状态: ${statusChinese(ring.status)}"
-                }
-                delay(1000)
-            }
-        }
-
-        CoroutineScope(Dispatchers.Default).launch {
-            while (true) {
-                overlayView.postInvalidate()
-                delay(30)
-            }
-        }
-    }
-
-    fun statusChinese(status: NuixSensorState): String {
-        return when(status) {
-            NuixSensorState.SCANNING -> "扫描中"
-            NuixSensorState.CONNECTING -> "连接中"
-            NuixSensorState.CONNECTED -> "已连接"
-            NuixSensorState.DISCONNECTED -> "已断连"
-        }
-    }
-
-    fun gestureChinese(gesture: String): String {
-        return when (gesture) {
-            "pinch" -> { "捏合" }
-            "middle_pinch" -> { "中指捏合" }
-            "clap" -> { "拍手" }
-            "snap" -> { "打响指" }
-            "tap_plane" -> { "桌面单击" }
-            "tap_air" -> { "空中单击" }
-            "circle_clockwise" -> { "顺时针转" }
-            "circle_counterclockwise" -> { "逆时针转" }
-            "touch_ring" -> { "单击戒指" }
-            "touch_up" -> { "上滑" }
-            "touch_down" -> { "下滑" }
-            else -> { gesture }
-        }
-    }
-
-    fun touchChinese(touch: RingTouchEvent): String {
-        return when (touch) {
-            RingTouchEvent.UNKNOWN -> "未知"
-            RingTouchEvent.BOTH_BUTTON_PRESS -> "双键按压"
-            RingTouchEvent.BOTH_BUTTON_RELEASE -> "双键释放"
-            RingTouchEvent.BOTTOM_BUTTON_CLICK -> "下键单击"
-            RingTouchEvent.BOTTOM_BUTTON_DOUBLE_CLICK -> "下键双击"
-            RingTouchEvent.BOTTOM_BUTTON_LONG_PRESS -> "下键长按"
-            RingTouchEvent.BOTTOM_BUTTON_RELEASE -> "下键释放"
-            RingTouchEvent.TOP_BUTTON_CLICK -> "上键单击"
-            RingTouchEvent.TOP_BUTTON_DOUBLE_CLICK -> "上键双击"
-            RingTouchEvent.TOP_BUTTON_LONG_PRESS -> "上键长按"
-            RingTouchEvent.TOP_BUTTON_RELEASE -> "上键释放"
-            RingTouchEvent.TAP -> "单击"
-            RingTouchEvent.SWIPE_POSITIVE -> "上滑"
-            RingTouchEvent.SWIPE_NEGATIVE -> "下滑"
-            RingTouchEvent.FLICK_POSITIVE -> "上滑"
-            RingTouchEvent.FLICK_NEGATIVE -> "下滑"
-            RingTouchEvent.HOLD -> "长按"
-        }
+        ringManager.connect()
     }
 
     override fun onDestroy() {

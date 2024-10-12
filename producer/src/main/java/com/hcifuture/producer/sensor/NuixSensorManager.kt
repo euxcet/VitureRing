@@ -39,8 +39,6 @@ sealed class NuixSensorManagerEvent {
 @Singleton
 class NuixSensorManager @Inject constructor(
     private val internalSensorProvider: InternalSensorProvider,
-//    private val ringV1Provider: RingV1Provider,
-//    private val ringV2Provider: RingV2Provider,
     private val bleProvider: BleProvider,
     private val videoProvider: VideoProvider,
     private val audioProvider: AudioProvider,
@@ -50,8 +48,6 @@ class NuixSensorManager @Inject constructor(
     private val scope = CoroutineScope(Dispatchers.Default)
     private val providers = listOf(
         internalSensorProvider,
-//        ringV1Provider,
-//        ringV2Provider,
         bleProvider,
         videoProvider,
         audioProvider,
@@ -91,12 +87,10 @@ class NuixSensorManager @Inject constructor(
         = sensors.getValue(bleProvider)
             .filterIsInstance<RingV1>()
             .map { it }
-    //        = sensors.getValue(ringV1Provider).map { it as RingV1 }
     fun ringV2s(): List<RingV2>
         = sensors.getValue(bleProvider)
             .filterIsInstance<RingV2>()
             .map { it }
-//        = sensors.getValue(ringV2Provider).map { it as RingV2 }
     fun touchSensors(): List<TouchSensor>
         = sensors.getValue(touchSensorProvider).map { it as TouchSensor }
     fun locationSensors(): List<LocationSensor>
@@ -111,7 +105,7 @@ class NuixSensorManager @Inject constructor(
      */
     var defaultRing: NuixSensorProxy = NuixSensorProxy("DefaultRing", null)
     private fun defaultRing(): NuixSensor?
-        = defaultRingV1()
+        = defaultRingV2()
 //        = if (defaultRingV2() != null) { defaultRingV2() } else { defaultRingV1() }
     var defaultRingV1: NuixSensorProxy = NuixSensorProxy("DefaultRingV1", null)
     private fun defaultRingV1(): NuixSensor?
@@ -223,26 +217,10 @@ class NuixSensorManager @Inject constructor(
         scan(providers, timeout)
     }
 
-//    suspend fun scanRingV1(timeout: Long = 2000L) {
-//        scan(listOf(ringV1Provider), timeout)
-//    }
-//
-//    suspend fun scanRingV2(timeout: Long = 2000L) {
-//        scan(listOf(ringV2Provider), timeout)
-//    }
-
     suspend fun stopScanAll() {
         stopScan(providers)
     }
 
-//    suspend fun stopScanRingV1() {
-//        stopScan(listOf(ringV1Provider))
-//    }
-//
-//    suspend fun stopScanRingV2() {
-//        stopScan(listOf(ringV2Provider))
-//    }
-//
     /**
      * Flow
      */

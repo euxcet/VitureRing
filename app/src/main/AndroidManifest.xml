@@ -13,8 +13,10 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.BIND_ACCESSIBILITY_SERVICE" />
 
     <application
         android:name=".MainApplication"
@@ -27,6 +29,29 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Commander"
         tools:targetApi="31">
+        <activity
+            android:name=".ObjectActivity"
+            android:exported="false" />
+
+        <service
+            android:name=".AccService"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/accessibility_service_config" />
+        </service>
+        <service
+            android:name=".RingService"
+            android:enabled="true"
+            android:exported="true"
+            android:foregroundServiceType="connectedDevice" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"

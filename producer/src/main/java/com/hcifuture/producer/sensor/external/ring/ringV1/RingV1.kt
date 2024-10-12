@@ -14,6 +14,7 @@ import com.hcifuture.producer.sensor.external.ring.RingSpec
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -42,6 +43,7 @@ class RingV1(
     private lateinit var notifyReadCharacteristic: ClientBleGattCharacteristic
     private lateinit var notifyWriteCharacteristic: ClientBleGattCharacteristic
     private lateinit var connection: ClientBleGatt
+    private var count = 0
     private val _imuFlow = MutableSharedFlow<RingImuData>()
     private val _touchFlow = MutableSharedFlow<RingTouchData>()
     override val name: String = "RING[${deviceName}|${address}]"
@@ -57,10 +59,26 @@ class RingV1(
                 BytesDataCollector(listOf(this), listOf(_touchFlow.asSharedFlow()), "ring[${address}]Touch.bin"),
     )
 
+    private lateinit var countJob: Job
+    private lateinit var connectJob: Job
+
     override fun connect() {
         if (!connectable()) return
         status = NuixSensorState.CONNECTING
-        scope.launch {
+
+        countJob = scope.launch {
+            while (true) {
+                delay(4000)
+                if (count == 0) {
+                    disconnect()
+                } else {
+                    Log.e("Nuix", "Ring fps: ${count / 4}")
+                    count = 0
+                }
+            }
+        }
+
+        connectJob = scope.launch {
             try {
                 connection = ClientBleGatt.connect(context, address, scope)
                 if (!connection.isConnected) {
@@ -68,7 +86,6 @@ class RingV1(
                     return@launch
                 }
                 status = NuixSensorState.CONNECTED
-                connection.mtu
                 val services = connection.discoverServices()
                 var sppService: ClientBleGattService = services.findService(RingV1Spec.SPP_SERVICE_UUID)!!
                 val notifyService = services.findService(RingV1Spec.NOTIFY_SERVICE_UUID)!!
@@ -82,7 +99,7 @@ class RingV1(
                         /**
                          * TODO: use timestamps from the sensor?
                          */
-//                        Log.e("Nuix", "$data")
+                        count += 1
                         _imuFlow.emit(RingImuData(data.first, data.second))
                     }
                 }.launchIn(scope)
@@ -111,8 +128,6 @@ class RingV1(
                     writeType = BleWriteType.NO_RESPONSE
                 )
 
-                connection.requestMtu(517)
-
                 val commandList = arrayOf("ENSPP", "ENFAST", "TPOPS=1,1,1",
                     "IMUARG=0,0,0,200", "ENDB6AX")
                 for (command in commandList) {
@@ -129,6 +144,8 @@ class RingV1(
 
     override fun disconnect() {
         if (!disconnectable()) return
+        countJob.cancel()
+        connectJob.cancel()
         connection.disconnect()
         status = NuixSensorState.DISCONNECTED
     }
@@ -137,7 +154,8 @@ class RingV1(
         try {
             sppWriteCharacteristic.write(DataByteArray.from(data + "\r\n"))
         }
-        catch (_: Exception) {
+        catch (e: Exception) {
+            Log.e("Nuix", "Error ${e.message}")
         }
         delay(200)
     }
