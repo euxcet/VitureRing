@@ -3,6 +3,7 @@ package com.euxcet.viturering
 import android.util.Log
 import com.hcifuture.producer.detector.GestureDetector
 import com.hcifuture.producer.detector.OrientationDetector
+import com.hcifuture.producer.detector.WordDetector
 import com.hcifuture.producer.sensor.NuixSensor
 import com.hcifuture.producer.sensor.NuixSensorManager
 import com.hcifuture.producer.sensor.NuixSensorState
@@ -22,6 +23,7 @@ class RingManager @Inject constructor(
     private val nuixSensorManager: NuixSensorManager,
     private val gestureDetector: GestureDetector,
     private val orientationDetector: OrientationDetector,
+    private val wordDetector: WordDetector,
 ) {
     inner class ListenerBuilder {
         internal var touchCallback: ((RingTouchData) -> Unit)? = null
@@ -135,25 +137,26 @@ class RingManager @Inject constructor(
         }
 
         // Move cursor
-        orientationDetector.start()
-        CoroutineScope(Dispatchers.Default).launch {
-            orientationDetector.eventFlow.collect {
-                if (::listener.isInitialized) {
-                    listener.moveCallback?.invoke(it)
-                }
-            }
-        }
+//        orientationDetector.start()
+//        CoroutineScope(Dispatchers.Default).launch {
+//            orientationDetector.eventFlow.collect {
+//                if (::listener.isInitialized) {
+//                    listener.moveCallback?.invoke(it)
+//                }
+//            }
+//        }
 
         // Gesture
-        gestureDetector.start()
-        CoroutineScope(Dispatchers.Default).launch {
-            gestureDetector.eventFlow.collect {
-                if (::listener.isInitialized) {
-                    listener.gestureCallback?.invoke(it)
-                }
-            }
-        }
+//        gestureDetector.start()
+//        CoroutineScope(Dispatchers.Default).launch {
+//            gestureDetector.eventFlow.collect {
+//                if (::listener.isInitialized) {
+//                    listener.gestureCallback?.invoke(it)
+//                }
+//            }
+//        }
 
+        // Status
         CoroutineScope(Dispatchers.Default).launch {
             val ring = nuixSensorManager.defaultRing
             while (true) {
@@ -162,6 +165,11 @@ class RingManager @Inject constructor(
                 }
                 delay(1000)
             }
+        }
+
+        // Word
+        wordDetector.start()
+        CoroutineScope(Dispatchers.Default).launch {
         }
     }
 }
