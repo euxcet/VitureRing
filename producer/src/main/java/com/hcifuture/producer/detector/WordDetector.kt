@@ -76,7 +76,7 @@ class WordDetector @Inject constructor(
                 } else {
                     null
                 }
-                Log.e("Nuix", event.toString())
+                // Log.e("Nuix", event.toString())
                 if (touchState == TouchState.DOWN) {
                     // record trajectory
                 } else if (event == TouchState.UP) {

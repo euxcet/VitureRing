@@ -7,6 +7,7 @@ import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Log
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.LinearLayout
@@ -47,6 +48,10 @@ class MainActivity : ComponentActivity() {
         ))
         setContentView(R.layout.main)
         connectRing()
+        findViewById<TextView>(R.id.toHome).setOnClickListener {
+            val intent = Intent(this@MainActivity, HomeActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     private fun createRingButton(ring: NuixSensor): Button {
@@ -87,6 +92,7 @@ class MainActivity : ComponentActivity() {
             }
             onGestureCallback { // Gesture
                 runOnUiThread {
+                    Log.e("Nuix", "Gesture: $it")
                     val gestureText = "手势: ${LanguageUtils.gestureChinese(it)}"
                     gestureView.text = gestureText
                     when (it) {

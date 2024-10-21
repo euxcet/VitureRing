@@ -137,24 +137,24 @@ class RingManager @Inject constructor(
         }
 
         // Move cursor
-//        orientationDetector.start()
-//        CoroutineScope(Dispatchers.Default).launch {
-//            orientationDetector.eventFlow.collect {
-//                if (::listener.isInitialized) {
-//                    listener.moveCallback?.invoke(it)
-//                }
-//            }
-//        }
+        orientationDetector.start()
+        CoroutineScope(Dispatchers.Default).launch {
+            orientationDetector.eventFlow.collect {
+                if (::listener.isInitialized) {
+                    listener.moveCallback?.invoke(it)
+                }
+            }
+        }
 
         // Gesture
-//        gestureDetector.start()
-//        CoroutineScope(Dispatchers.Default).launch {
-//            gestureDetector.eventFlow.collect {
-//                if (::listener.isInitialized) {
-//                    listener.gestureCallback?.invoke(it)
-//                }
-//            }
-//        }
+        gestureDetector.start()
+        CoroutineScope(Dispatchers.Default).launch {
+            gestureDetector.eventFlow.collect {
+                if (::listener.isInitialized) {
+                    listener.gestureCallback?.invoke(it)
+                }
+            }
+        }
 
         // Status
         CoroutineScope(Dispatchers.Default).launch {

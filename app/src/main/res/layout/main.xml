@@ -20,12 +20,19 @@
 
             <TextView
                 android:id="@+id/statusView"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:text="连接状态:"
                 android:textColor="#ffffff"
                 android:textSize="30sp" />
+            <TextView
+                android:id="@+id/toHome"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="功能页面"
+                android:textColor="@color/white"
+                android:textSize="26sp"/>
         </LinearLayout>
 
         <TextView

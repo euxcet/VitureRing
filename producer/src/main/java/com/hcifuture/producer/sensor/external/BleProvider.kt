@@ -4,8 +4,10 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
+import android.os.Build
 import android.util.Log
 import androidx.core.content.ContextCompat
+import com.hcifuture.producer.BuildConfig
 import com.hcifuture.producer.sensor.NuixSensor
 import com.hcifuture.producer.sensor.NuixSensorProvider
 import com.hcifuture.producer.sensor.external.ring.ringV1.RingV1
@@ -33,8 +35,9 @@ class BleProvider @Inject constructor(
 
     @SuppressLint("MissingPermission")
     override fun scan(): Flow<List<NuixSensor>> {
-        if (ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_SCAN)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_SCAN)
                 == PackageManager.PERMISSION_DENIED) {
+            Log.e("Nuix", "No permission for BLE scan")
             return flowOf()
         }
         val aggregator = BleScanResultAggregator()

@@ -83,7 +83,7 @@ class DynamicGestureDetector @Inject constructor(
                 if (softmax[result] > 0.98 &&
                     !labels[result].contains("negative") &&
                     lastGestureCount >= 3) {
-                    Log.e("Nuix", labels[result])
+                    // Log.e("Nuix", labels[result])
                     if (currentTimestamp > lastTrigger + minTriggerInterval &&
                         currentTimestamp > lastTriggerTimestamp[result] + 500L) {
                         eventFlow.emit(labels[result])

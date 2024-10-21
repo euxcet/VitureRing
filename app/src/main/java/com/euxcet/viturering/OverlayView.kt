@@ -27,6 +27,7 @@ class OverlayObject(
     var selected: Boolean,
     var color: Int,
     var scale: Float = 0.0f,
+    var icon: Int = 0
 ) {
     fun getRealScale(): Float {
         return if (scale < 0) {
@@ -73,6 +74,7 @@ class OverlayView(context: Context) : View(context) {
                 angle = 30.0f,
                 selected = false,
                 color = Color.WHITE,
+                icon = R.drawable.ic_drink
             )
         )
         objects.add(
@@ -84,6 +86,7 @@ class OverlayView(context: Context) : View(context) {
                 angle = 0.0f,
                 selected = false,
                 color = Color.WHITE,
+                icon = R.drawable.ic_banana
             )
         )
         CoroutineScope(Dispatchers.Default).launch {
