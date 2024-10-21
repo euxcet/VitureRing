@@ -32,10 +32,12 @@
         <activity
             android:name=".HandWritingActivity"
             android:exported="false"
+            android:screenOrientation="landscape"
             android:theme="@style/Theme.AppCompat.DayNight.NoActionBar" />
         <activity
             android:name=".GestureDetectActivity"
             android:exported="false"
+            android:screenOrientation="landscape"
             android:theme="@style/Theme.AppCompat.DayNight.NoActionBar" />
         <activity
             android:name=".HomeActivity"
