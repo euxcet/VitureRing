@@ -145,9 +145,11 @@ class RingV2(
                         }
                         cmd == 0x40.toByte() && subCmd == 0x06.toByte() -> {
                             // imu
+                            Log.e("Nuix", it.value.size.toString() + " " + it.value.toString())
                             val data = it.value.slice(5 until it.value.size)
                                 .chunked(2)
                                 .map { (l, h) -> (l.toInt().and(0xFF) or h.toInt().shl(8)).toFloat() }
+                            var tot = 0
                             for (i in data.indices step 6) {
                                 val imu = data.slice(i until i + 6).toMutableList()
                                 imu[0] *= 9.8f / 1000.0f
@@ -164,15 +166,16 @@ class RingV2(
                                 imu[2] = -imu[2]
                                 imu[3] = -imu[3]
                                 imu[5] = -imu[5]
+                                tot += 1
+                                if (tot == 5) {
+                                    imu[5] = lastGyro[2]
+                                }
                                 lastGyro[0] = imu[3]
                                 lastGyro[1] = imu[4]
                                 lastGyro[2] = imu[5]
                                 imu[3] -= zeroGyro[0]
                                 imu[4] -= zeroGyro[1]
                                 imu[5] -= zeroGyro[2]
-//                                imu[3] -= 0.44f
-//                                imu[4] -= 0.23f
-//                                imu[5] -= -0.03f
                                 count += 1
                                 _imuFlow.emit(
                                     RingImuData(
