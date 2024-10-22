@@ -118,8 +118,7 @@ class RingManager @Inject constructor(
                             ring.connect()
                             nuixSensorManager.defaultRing.switchTarget(ring)
                             while (ring.status == NuixSensorState.CONNECTING) {
-                                delay(1000)
-                                calibrate()
+                                delay(500)
                             }
                             break
                         }
