@@ -12,6 +12,7 @@ import android.view.WindowManager
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.annotation.RequiresApi
 import androidx.core.view.children
@@ -52,6 +53,7 @@ class MainActivity : ComponentActivity() {
 //            val intent = Intent(this@MainActivity, HomeActivity::class.java)
 //            startActivity(intent)
             ringManager.calibrate()
+            Toast.makeText(this, "校准成功", Toast.LENGTH_SHORT).show()
         }
     }
 
