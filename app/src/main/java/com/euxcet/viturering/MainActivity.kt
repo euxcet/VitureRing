@@ -49,8 +49,9 @@ class MainActivity : ComponentActivity() {
         setContentView(R.layout.main)
         connectRing()
         findViewById<TextView>(R.id.toHome).setOnClickListener {
-            val intent = Intent(this@MainActivity, HomeActivity::class.java)
-            startActivity(intent)
+//            val intent = Intent(this@MainActivity, HomeActivity::class.java)
+//            startActivity(intent)
+            ringManager.calibrate()
         }
     }
 
