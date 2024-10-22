@@ -107,7 +107,7 @@ class MainActivity : ComponentActivity() {
                             startActivity(intent)
                         }
                         "circle_clockwise" -> {
-                            val intent = Intent(this@MainActivity, ObjectActivity::class.java)
+                            val intent = Intent(this@MainActivity, HomeActivity::class.java)
                             startActivity(intent)
                         }
                         "touch_ring" -> {

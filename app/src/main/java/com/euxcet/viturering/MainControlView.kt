@@ -16,18 +16,20 @@ class MainControlView(context: Context, attrs: AttributeSet?, defStyleAttr: Int)
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
     constructor(context: Context) : this(context, null)
 
-    private var cursorX = 200f
-    private var cursorY = 100f
     private var cursorRadius = dip2px(context, 10f).toFloat()
     private var canvasWidth = 1920f
     private var canvasHeight = 1080f
+    private var cursorX = 960f
+    private var cursorY = 540f
 
     init {
         viewTreeObserver.addOnGlobalLayoutListener {
-            canvasWidth = width.toFloat()
-            canvasHeight = height.toFloat()
-            cursorX = width / 2f
-            cursorY = height / 2f
+            if (canvasWidth.toInt() != width || canvasHeight.toInt() != height) {
+                canvasWidth = width.toFloat()
+                canvasHeight = height.toFloat()
+                cursorX = width / 2f
+                cursorY = height / 2f
+            }
         }
     }
 

@@ -93,6 +93,9 @@ class HandWritingActivity : AppCompatActivity() {
 //                            val intent = Intent(this@HomeActivity, ObjectActivity::class.java)
 //                            startActivity(intent)
                         }
+                        "circle_counterclockwise" -> {
+                            finish()
+                        }
                         "touch_ring" -> {
                             //overlayView?.reset()
                         }

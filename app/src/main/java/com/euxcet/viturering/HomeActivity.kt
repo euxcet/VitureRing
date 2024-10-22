@@ -43,6 +43,10 @@ class HomeActivity : AppCompatActivity() {
         controlView = findViewById<MainControlView>(R.id.control_view).apply {
 
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
         connectRing()
     }
 

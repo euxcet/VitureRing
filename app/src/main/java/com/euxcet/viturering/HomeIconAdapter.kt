@@ -13,7 +13,7 @@ class HomeIconAdapter : BaseAdapter() {
         Icon("writing", R.drawable.icon_writing, "手写输入"),
         Icon("gesture", R.drawable.icon_gesture, "手势识别"),
 //        Icon(R.drawable.ic_help, "3D模型"),
-        Icon("setting", R.drawable.icon_setting, "设置")
+        // Icon("setting", R.drawable.icon_setting, "设置")
     )
 
     override fun getCount(): Int {

@@ -2,23 +2,92 @@ package com.euxcet.viturering
 
 import android.content.pm.ActivityInfo
 import android.os.Bundle
+import android.util.Log
 import android.view.WindowManager
+import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.euxcet.viturering.utils.LanguageUtils
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class GestureDetectActivity : AppCompatActivity() {
+
+    @Inject
+    lateinit var ringManager: RingManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
         window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN)
         setContentView(R.layout.activity_gesture_detect)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
+        connectRing()
+    }
+
+    private fun connectRing() {
+        ringManager.registerListener {
+            onConnectCallback { // Connect
+                runOnUiThread {
+
+                }
+            }
+            onGestureCallback { // Gesture
+                runOnUiThread {
+                    Log.e("Nuix", "Gesture: $it")
+                    val gestureText = "手势: ${LanguageUtils.gestureChinese(it)}"
+                    findViewById<TextView>(R.id.gesture_info).text = gestureText
+                    when (it) {
+                        "pinch" -> {
+
+                        }
+                        "middle_pinch" -> {
+                            //overlayView?.switch()
+                        }
+                        "snap" -> {
+//                            val intent = Intent(Settings.ACTION_SETTINGS)
+//                            startActivity(intent)
+                        }
+                        "circle_clockwise" -> {
+//                            val intent = Intent(this@HomeActivity, ObjectActivity::class.java)
+//                            startActivity(intent)
+                        }
+                        "circle_counterclockwise" -> {
+                            finish()
+                        }
+                        "touch_ring" -> {
+                            //overlayView?.reset()
+                        }
+                    }
+                }
+            }
+            onStateCallback { // State
+                runOnUiThread {
+//                    val statusText = "连接状态: ${LanguageUtils.statusChinese(it)}"
+                    // statusView.text = statusText
+                    findViewById<TextView>(R.id.ring_state).text = LanguageUtils.statusChinese(it)
+                }
+            }
+            onTouchCallback { // Touch
+                runOnUiThread {
+                    val touchText = "触摸: ${(it.data)}"
+                    findViewById<TextView>(R.id.gesture_info).text = touchText
+//                    touchView.text = touchText
+//                    when (it.data) {
+//                        RingTouchEvent.BOTTOM_BUTTON_CLICK -> {
+//                            overlayView?.reset()
+//                        }
+//                        RingTouchEvent.TAP -> {
+//                            overlayView?.reset()
+//                        }
+//                        else -> {}
+//                    }
+                }
+            }
         }
+        ringManager.connect()
     }
 }
