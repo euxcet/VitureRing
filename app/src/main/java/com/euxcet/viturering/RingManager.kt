@@ -84,6 +84,12 @@ class RingManager @Inject constructor(
         return nuixSensorManager.ringV2s()
     }
 
+    fun calibrate() {
+        if (nuixSensorManager.defaultRing.target is RingV2) {
+            (nuixSensorManager.defaultRing.target as RingV2).calibrate()
+        }
+    }
+
     fun connect() {
         if (connected) {
             if (::listener.isInitialized) {
@@ -112,7 +118,8 @@ class RingManager @Inject constructor(
                             ring.connect()
                             nuixSensorManager.defaultRing.switchTarget(ring)
                             while (ring.status == NuixSensorState.CONNECTING) {
-                                delay(100)
+                                delay(1000)
+                                calibrate()
                             }
                             break
                         }

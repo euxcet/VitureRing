@@ -34,6 +34,7 @@ import no.nordicsemi.android.kotlin.ble.client.main.callback.ClientBleGatt
 import no.nordicsemi.android.kotlin.ble.client.main.service.ClientBleGattCharacteristic
 import no.nordicsemi.android.kotlin.ble.core.data.BleGattConnectionPriority
 import no.nordicsemi.android.kotlin.ble.core.data.BleWriteType
+import java.util.Arrays
 import kotlin.experimental.and
 
 @SuppressLint("MissingPermission")
@@ -71,6 +72,14 @@ class RingV2(
     private lateinit var countJob: Job
     private lateinit var connectJob: Job
     private var readJob: Job? = null
+    private val zeroGyro: MutableList<Float> = mutableListOf(0.0f, 0.0f, 0.0f)
+    private val lastGyro: MutableList<Float> = mutableListOf(0.0f, 0.0f, 0.0f)
+
+    fun calibrate() {
+        zeroGyro[0] = lastGyro[0]
+        zeroGyro[1] = lastGyro[1]
+        zeroGyro[2] = lastGyro[2]
+    }
 
     override fun connect() {
         if (!connectable()) return
@@ -155,9 +164,15 @@ class RingV2(
                                 imu[2] = -imu[2]
                                 imu[3] = -imu[3]
                                 imu[5] = -imu[5]
-                                imu[3] -= 0.44f
-                                imu[4] -= 0.23f
-                                imu[5] -= -0.03f
+                                lastGyro[0] = imu[3]
+                                lastGyro[1] = imu[4]
+                                lastGyro[2] = imu[5]
+                                imu[3] -= zeroGyro[0]
+                                imu[4] -= zeroGyro[1]
+                                imu[5] -= zeroGyro[2]
+//                                imu[3] -= 0.44f
+//                                imu[4] -= 0.23f
+//                                imu[5] -= -0.03f
                                 count += 1
                                 _imuFlow.emit(
                                     RingImuData(
