@@ -145,7 +145,6 @@ class RingV2(
                         }
                         cmd == 0x40.toByte() && subCmd == 0x06.toByte() -> {
                             // imu
-                            Log.e("Nuix", it.value.size.toString() + " " + it.value.toString())
                             val data = it.value.slice(5 until it.value.size)
                                 .chunked(2)
                                 .map { (l, h) -> (l.toInt().and(0xFF) or h.toInt().shl(8)).toFloat() }
@@ -204,7 +203,6 @@ class RingV2(
                                 event = RingTouchEvent.HOLD
                             }
                             if (event != null) {
-                                Log.e("Nuix", "TriggerGesture $it")
                                 _touchEventFlow.emit(
                                     RingTouchData(
                                         data = event,
@@ -225,7 +223,6 @@ class RingV2(
                             val length = it.value[4].toInt().and(0xFF) or it.value[5].toInt().shl(8)
                             val sequenceId = it.value[6].toInt().and(0xFF) or it.value[7].toInt().and(0xFF).shl(8) or
                                              it.value[8].toInt().and(0xFF).shl(16) or it.value[9].toInt().shl(24)
-                            Log.e("RingV2", "length: ${length}, sequenceId: ${sequenceId}")
                             _audioFlow.emit(
                                 RingV2AudioData(
                                     length = length,
@@ -270,7 +267,6 @@ class RingV2(
     }
 
     suspend  fun openMic() {
-        Log.e("RingV2", "Open mic")
         write(RingV2Spec.OPEN_MIC)
     }
 

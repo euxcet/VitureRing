@@ -67,14 +67,21 @@ class MainActivity : ComponentActivity() {
             button.setBackgroundColor(Color.rgb(220, 220, 220))
         }
         button.setOnClickListener {
-            for (child in ringLayout.children) {
-                if ((child as Button).text == ring.name) {
-                    child.setBackgroundColor(Color.rgb(30, 150, 30))
-                } else {
+            if (!ringManager.isActive(ring)) {
+                for (child in ringLayout.children) {
+                    if ((child as Button).text == ring.name) {
+                        child.setBackgroundColor(Color.rgb(30, 150, 30))
+                    } else {
+                        child.setBackgroundColor(Color.rgb(220, 220, 220))
+                    }
+                }
+                ringManager.selectRing(ring)
+            } else {
+                for (child in ringLayout.children) {
                     child.setBackgroundColor(Color.rgb(220, 220, 220))
                 }
+                ringManager.deselect()
             }
-            ringManager.selectRing(ring)
         }
         return button
     }

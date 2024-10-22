@@ -61,6 +61,11 @@ class RingManager @Inject constructor(
         listener = ListenerBuilder().also(builder)
     }
 
+    fun deselect() {
+        nuixSensorManager.defaultRing.disconnect()
+        selectedRingName = ""
+    }
+
     fun selectRing(ring: NuixSensor) {
         if (selectedRingName != ring.name) {
             nuixSensorManager.defaultRing.disconnect()
@@ -88,6 +93,10 @@ class RingManager @Inject constructor(
         if (nuixSensorManager.defaultRing.target is RingV2) {
             (nuixSensorManager.defaultRing.target as RingV2).calibrate()
         }
+    }
+
+    fun disconnect() {
+        nuixSensorManager.defaultRing.disconnect()
     }
 
     fun connect() {
