@@ -2,6 +2,7 @@ package com.euxcet.viturering
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Path
@@ -37,6 +38,7 @@ class HandwritingControlView(context: Context, attrs: AttributeSet?, defStyleAtt
     private val pathList = mutableListOf<Path>()
     private var curPath: Path? = null
     private var onWriteSubmit: ((Bitmap) -> Unit)? = null
+    private var pencilBitmap: Bitmap? = null
 
     init {
         viewTreeObserver.addOnGlobalLayoutListener {
@@ -47,6 +49,8 @@ class HandwritingControlView(context: Context, attrs: AttributeSet?, defStyleAtt
                 cursorY = height / 2f
             }
         }
+        val rawPencilBitmap = BitmapFactory.decodeResource(resources, R.drawable.pencil)
+        pencilBitmap = Bitmap.createScaledBitmap(rawPencilBitmap, dip2px(context, 24f), dip2px(context, 24f), false)
     }
 
     private val cursorPaint = Paint().apply {
@@ -65,7 +69,13 @@ class HandwritingControlView(context: Context, attrs: AttributeSet?, defStyleAtt
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        canvas.drawCircle(cursorX, cursorY, cursorRadius, cursorPaint)
+        if (mode == HandwritingMode.WRITING) {
+            pencilBitmap?.let {
+                canvas.drawBitmap(it, cursorX, cursorY - it.height, null)
+            }
+        } else {
+            canvas.drawCircle(cursorX, cursorY, cursorRadius, cursorPaint)
+        }
         pathList.forEach {
             canvas.drawPath(it, pathPaint)
         }
@@ -117,7 +127,7 @@ class HandwritingControlView(context: Context, attrs: AttributeSet?, defStyleAtt
             }
             if (pathList.size > 0) {
                 writeSubmitJob = CoroutineScope(Dispatchers.Main).launch {
-                    delay(1000 * 1)
+                    delay(1000 * 2)
                     try {
                         getWriteBitmap()?.let { bitmap ->
                             onWriteSubmit?.invoke(bitmap)

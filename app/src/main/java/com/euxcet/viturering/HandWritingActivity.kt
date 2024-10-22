@@ -13,9 +13,11 @@ import androidx.core.view.WindowInsetsCompat
 import com.euxcet.viturering.input.HandwritingApi
 import com.euxcet.viturering.input.XFHandwriting
 import com.euxcet.viturering.utils.LanguageUtils
+import com.hcifuture.producer.sensor.data.RingTouchEvent
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -66,6 +68,9 @@ class HandWritingActivity : AppCompatActivity() {
             inputView?.requestFocus()
         }
     }
+
+    private var isRingTouchHold = false
+    private var endHoldJob: Job? = null
 
     private fun connectRing() {
         ringManager.registerListener {
@@ -118,15 +123,24 @@ class HandWritingActivity : AppCompatActivity() {
                 runOnUiThread {
                     val touchText = "触摸: ${(it.data)}"
 //                    touchView.text = touchText
-//                    when (it.data) {
-//                        RingTouchEvent.BOTTOM_BUTTON_CLICK -> {
-//                            overlayView?.reset()
-//                        }
-//                        RingTouchEvent.TAP -> {
-//                            overlayView?.reset()
-//                        }
-//                        else -> {}
-//                    }
+                    when (it.data) {
+                        RingTouchEvent.HOLD -> {
+                            if (!isRingTouchHold) {
+                                isRingTouchHold = true
+                                controlView?.beginWrite()
+                            }
+                            endHoldJob?.cancel()
+                            endHoldJob = CoroutineScope(Dispatchers.Main).launch {
+                                delay(300)
+                                controlView?.endWrite()
+                                isRingTouchHold = false
+                            }
+                        }
+                        RingTouchEvent.TAP -> {
+
+                        }
+                        else -> {}
+                    }
                 }
             }
         }

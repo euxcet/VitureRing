@@ -76,6 +76,15 @@ class HomeActivity : AppCompatActivity() {
         }
     }
 
+    private fun selectCurPointIcon() {
+        val cursorPoint = controlView?.getCursorPoint()
+        gridView?.pointToPosition(cursorPoint?.x?.toInt() ?: 0, cursorPoint?.y?.toInt() ?: 0)?.let {
+            onSelectIcon(it)
+        }
+        Log.e("Nuix", "Cursor: $cursorPoint")
+
+    }
+
     private fun connectRing() {
         ringManager.registerListener {
             onConnectCallback { // Connect
@@ -89,23 +98,22 @@ class HomeActivity : AppCompatActivity() {
                     val gestureText = "手势: ${LanguageUtils.gestureChinese(it)}"
                     when (it) {
                         "pinch" -> {
-                            val cursorPoint = controlView?.getCursorPoint()
-                            gridView?.pointToPosition(cursorPoint?.x?.toInt() ?: 0, cursorPoint?.y?.toInt() ?: 0)?.let {
-                                onSelectIcon(it)
-                            }
-                            Log.e("Nuix", "Cursor: $cursorPoint")
                         }
+
                         "middle_pinch" -> {
                             //overlayView?.switch()
                         }
+
                         "snap" -> {
 //                            val intent = Intent(Settings.ACTION_SETTINGS)
 //                            startActivity(intent)
                         }
+
                         "circle_clockwise" -> {
 //                            val intent = Intent(this@HomeActivity, ObjectActivity::class.java)
 //                            startActivity(intent)
                         }
+
                         "touch_ring" -> {
                             //overlayView?.reset()
                         }
@@ -127,19 +135,23 @@ class HomeActivity : AppCompatActivity() {
             onTouchCallback { // Touch
                 runOnUiThread {
                     val touchText = "触摸: ${(it.data)}"
+                    Log.e("Nuix", "Touch: $touchText")
 //                    touchView.text = touchText
-//                    when (it.data) {
-//                        RingTouchEvent.BOTTOM_BUTTON_CLICK -> {
-//                            overlayView?.reset()
-//                        }
-//                        RingTouchEvent.TAP -> {
-//                            overlayView?.reset()
-//                        }
-//                        else -> {}
+                    when (it.data) {
+                        RingTouchEvent.BOTTOM_BUTTON_CLICK -> {
+
+                        }
+
+                        RingTouchEvent.TAP -> {
+                            selectCurPointIcon()
+                        }
+
+                        else -> {}
 //                    }
+                    }
                 }
             }
+            ringManager.connect()
         }
-        ringManager.connect()
     }
 }
