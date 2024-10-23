@@ -51,7 +51,7 @@ class OrientationDetector @Inject constructor(
                     val eulerDelta = delta.yawPitchRoll()
                     val moveX = eulerDelta.x * 1200
                     val moveY = -eulerDelta.y * 800
-                    if (sqrt(moveX * moveX + moveY * moveY) > 3) {
+                    if (sqrt(moveX * moveX + moveY * moveY) > 1) {
                         eventFlow.emit(Pair(moveX, moveY))
                     }
                     queue.clear()
