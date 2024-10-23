@@ -48,13 +48,17 @@ class MainActivity : ComponentActivity() {
             Manifest.permission.INTERNET,
         ))
         setContentView(R.layout.main)
-        connectRing()
         findViewById<TextView>(R.id.toHome).setOnClickListener {
 //            val intent = Intent(this@MainActivity, HomeActivity::class.java)
 //            startActivity(intent)
             ringManager.calibrate()
             Toast.makeText(this, "校准成功", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        connectRing()
     }
 
     private fun createRingButton(ring: NuixSensor): Button {

@@ -27,6 +27,9 @@ class HomeActivity : AppCompatActivity() {
     private var controlView: MainControlView? = null
     private val iconAdapter = HomeIconAdapter()
     private var gridView: GridView? = null
+    private val density by lazy {
+        resources.displayMetrics.density
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

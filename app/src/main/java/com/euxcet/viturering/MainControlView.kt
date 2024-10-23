@@ -22,9 +22,6 @@ class MainControlView(context: Context, attrs: AttributeSet?, defStyleAttr: Int)
     private var canvasHeight = 1080f
     private var cursorX = 960f
     private var cursorY = 540f
-    private val density by lazy {
-        context.resources.displayMetrics.density
-    }
 
     init {
         viewTreeObserver.addOnGlobalLayoutListener {
@@ -61,7 +58,7 @@ class MainControlView(context: Context, attrs: AttributeSet?, defStyleAttr: Int)
     fun move(x: Float, y: Float) {
         Log.e("Nuix", x.toString() + " " + y.toString())
         cursorX += x
-        cursorY += y * density
+        cursorY += y
         cursorX = max(min(cursorX, canvasWidth), 0f)
         cursorY = max(min(cursorY, canvasHeight), 0f)
         postInvalidate()
