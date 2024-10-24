@@ -3,6 +3,7 @@ package com.euxcet.viturering
 import android.util.Log
 import com.hcifuture.producer.detector.GestureDetector
 import com.hcifuture.producer.detector.OrientationDetector
+import com.hcifuture.producer.detector.TouchState
 import com.hcifuture.producer.detector.WordDetector
 import com.hcifuture.producer.sensor.NuixSensor
 import com.hcifuture.producer.sensor.NuixSensorManager
@@ -31,6 +32,8 @@ class RingManager @Inject constructor(
         internal var gestureCallback: ((String) -> Unit)? = null
         internal var stateCallback: ((NuixSensorState) -> Unit)? = null
         internal var connectCallback: ((List<NuixSensor>) -> Unit)? = null
+        internal var planeEventCallback: ((TouchState) -> Unit)? = null
+        internal var planeMoveCallback: ((Pair<Float, Float>) -> Unit)? = null
 
         fun onTouchCallback(callback: ((RingTouchData) -> Unit)) {
             touchCallback = callback
@@ -50,6 +53,14 @@ class RingManager @Inject constructor(
 
         fun onConnectCallback(callback: ((List<NuixSensor>) -> Unit)) {
             connectCallback = callback
+        }
+
+        fun onPlaneEventCallback(callback: ((TouchState) -> Unit)) {
+            planeEventCallback = callback
+        }
+
+        fun onPlaneMoveCallback(callback: ((Pair<Float, Float>) -> Unit)) {
+            planeMoveCallback = callback
         }
     }
 
@@ -185,6 +196,19 @@ class RingManager @Inject constructor(
         // Word
         wordDetector.start()
         CoroutineScope(Dispatchers.Default).launch {
+            wordDetector.gestureFlow.collect {
+                if (::listener.isInitialized) {
+                    listener.planeEventCallback?.invoke(it)
+                }
+            }
+        }
+
+        CoroutineScope(Dispatchers.Default).launch {
+            wordDetector.moveFlow.collect {
+                if (::listener.isInitialized) {
+                    listener.planeMoveCallback?.invoke(it)
+                }
+            }
         }
     }
 }

@@ -2,6 +2,8 @@ package com.hcifuture.producer.detector
 
 import android.content.res.AssetManager
 import android.util.Log
+import com.hcifuture.producer.detector.utils.MadgwickFilter
+import com.hcifuture.producer.detector.utils.Quaternion
 import com.hcifuture.producer.sensor.NuixSensorManager
 import com.hcifuture.producer.sensor.data.RingImuData
 import com.hcifuture.producer.sensor.external.ring.RingSpec
@@ -15,22 +17,31 @@ import org.pytorch.LiteModuleLoader
 import org.pytorch.Tensor
 import javax.inject.Inject
 import kotlin.math.exp
+import kotlin.math.sqrt
+
+enum class TouchState {
+    UP, DOWN
+}
 
 class WordDetector @Inject constructor(
     private val assetManager: AssetManager,
     private val nuixSensorManager: NuixSensorManager,
 ) {
 
-    enum class TouchState {
-        UP, DOWN
-    }
-
     private val scope = CoroutineScope(Dispatchers.Default)
-    val eventFlow = MutableSharedFlow<String>(replay = 0)
     private val labels = arrayOf("ALWAYS_CONTACT", "ALWAYS_NO_CONTACT", "UP", "DOWN")
-    private val calculateFrequency: Float = 50.0f
+    private val calculateFrequency: Float = 100.0f
     private val data = Array(6) { FloatArray(20) { 0.0f } }
+    private val moveData = Array(13) { FloatArray(6) { 0.0f } }
+    private val accXData = FloatArray(50)
     private var touchState = TouchState.UP
+    val filter: MadgwickFilter = MadgwickFilter(0.1f, Quaternion(0.012f, -0.825f, 0.538f, 0.174f), 200.0f)
+    private var orientation = filter.q.copy()
+
+    val gestureFlow = MutableSharedFlow<TouchState>(replay = 0)
+    val moveFlow = MutableSharedFlow<Pair<Float, Float>>(replay = 0)
+
+    var counter = 0
 
     fun getTouchEvent(state: TouchState): TouchState? {
         val event: TouchState? =
@@ -45,7 +56,30 @@ class WordDetector @Inject constructor(
         return event
     }
 
+    fun isStable(x: List<Float>): Boolean {
+        return x.max() - x.min() < 3
+    }
+
+    fun detectUp(x: FloatArray): Int {
+        if (isStable(x.take(10)) &&
+            isStable(x.takeLast(10)) &&
+            x.takeLast(10).average() - x.take(10).average() > 4) {
+            return 2
+        }
+        return 0
+    }
+
     fun start() {
+        val model = LiteModuleLoader.loadModuleFromAsset(assetManager, "touch_event.ptl")
+        val moveModel = LiteModuleLoader.loadModuleFromAsset(assetManager, "move.ptl")
+        var hx0 = IValue.from(Tensor.fromBlob(
+            FloatArray(128),
+            longArrayOf(1, 1, 128)
+        ))
+        var hx1 = IValue.from(Tensor.fromBlob(
+            FloatArray(128),
+            longArrayOf(1, 1, 128)
+        ))
         scope.launch {
             nuixSensorManager.defaultRing.getProxyFlow<RingImuData>(
                 RingSpec.imuFlowName(nuixSensorManager.defaultRing)
@@ -56,31 +90,78 @@ class WordDetector @Inject constructor(
                     }
                     data[i][19] = imu.data[i]
                 }
-            }
-        }
-
-        scope.launch {
-            val model = LiteModuleLoader.loadModuleFromAsset(assetManager, "touch_event.ptl")
-            while (true) {
-                delay((1000.0f / calculateFrequency).toLong())
-                val tensor = Tensor.fromBlob(
-                    data.flatMap { it.toList() }.toFloatArray(),
-                    longArrayOf(1, 6, 20)
-                )
-                val output = model.forward(IValue.from(tensor)).toTensor().dataAsFloatArray
-                val expSum = output.map { exp(it) }.sum()
-                val softmax = output.map { exp(it) / expSum }
-                val result = softmax.withIndex().maxByOrNull { it.value }?.index!!
-                val event = if (result >= 2 && softmax[result] > 0.8) {
-                    getTouchEvent(if (result == 2) TouchState.UP else TouchState.DOWN)
-                } else {
-                    null
+                for (i in 0 until 49) {
+                    accXData[i] = accXData[i + 1]
                 }
-                // Log.e("Nuix", event.toString())
+                accXData[49] = imu.data[0]
+                filter.update(
+                    listOf(
+                        imu.data[0], imu.data[1], imu.data[2],
+                        imu.data[3], imu.data[4], imu.data[5],
+                    )
+                )
+                orientation = filter.q.copy()
+                val GRAVITY = 9.76f
+                for (i in 0 until 6) {
+                    for (j in 0 until 12) {
+                        moveData[j][i] = moveData[j + 1][i]
+                    }
+                }
+                moveData[12][0] =
+                    imu.data[0] - (2.0f * (orientation.x * orientation.z - orientation.w * orientation.y) * GRAVITY)
+                moveData[12][1] =
+                    imu.data[1] - (2.0f * (orientation.y * orientation.z + orientation.w * orientation.x) * GRAVITY)
+                moveData[12][2] =
+                    imu.data[2] - ((orientation.w * orientation.w - orientation.x * orientation.x - orientation.y * orientation.y + orientation.z * orientation.z) * GRAVITY)
+                moveData[12][3] = imu.data[3]
+                moveData[12][4] = imu.data[4]
+                moveData[12][5] = imu.data[5]
+                counter += 1
+                if (counter % 1 == 0) {
+                    val tensor = Tensor.fromBlob(
+                        data.flatMap { it.toList() }.toFloatArray(),
+                        longArrayOf(1, 6, 20)
+                    )
+                    val output = model.forward(IValue.from(tensor)).toTensor().dataAsFloatArray
+                    val expSum = output.map { exp(it) }.sum()
+                    val softmax = output.map { exp(it) / expSum }
+                    var result = softmax.withIndex().maxByOrNull { it.value }?.index!!
+                    if (softmax[result] < 0.8) {
+                        result = 0
+                    }
+                    if (result != 3) {
+                        result = detectUp(accXData)
+                    }
+                    val event = if (result >= 2) {
+                        getTouchEvent(if (result == 2) TouchState.UP else TouchState.DOWN)
+                    } else {
+                        null
+                    }
+                    if (event != null) {
+                        gestureFlow.emit(event)
+                    }
+                }
                 if (touchState == TouchState.DOWN) {
-                    // record trajectory
-                } else if (event == TouchState.UP) {
-                    // upload
+                    val inputTensor = Tensor.fromBlob(
+                        moveData.flatMap { it.toList() }.toFloatArray(),
+                        longArrayOf(1, 13, 6)
+                    )
+                    val outputTensor = moveModel.forward(
+                        IValue.from(inputTensor),
+                        IValue.tupleFrom(hx0, hx1),
+                    ).toTuple()
+                    val output = outputTensor[0].toTensor().dataAsFloatArray
+                    val hx = outputTensor[1].toTuple()
+                    hx0 = hx[0]
+                    hx1 = hx[1]
+                    val gyrX = moveData[12][3]
+                    val gyrY = moveData[12][4]
+                    val gyrZ = moveData[12][5]
+                    if (sqrt(gyrX * gyrX + gyrY * gyrY + gyrZ * gyrZ) < 0.1f) {
+                        moveFlow.emit(Pair(0f, 0f))
+                    } else {
+                        moveFlow.emit(Pair(output[0], output[1]))
+                    }
                 }
             }
         }

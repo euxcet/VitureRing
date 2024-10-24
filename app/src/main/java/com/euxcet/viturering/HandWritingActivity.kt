@@ -13,6 +13,7 @@ import androidx.core.view.WindowInsetsCompat
 import com.euxcet.viturering.input.HandwritingApi
 import com.euxcet.viturering.input.XFHandwriting
 import com.euxcet.viturering.utils.LanguageUtils
+import com.hcifuture.producer.detector.TouchState
 import com.hcifuture.producer.sensor.data.RingTouchEvent
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -108,9 +109,9 @@ class HandWritingActivity : AppCompatActivity() {
                 }
             }
             onMoveCallback { // Move
-                runOnUiThread {
-                    controlView?.move(it.first, it.second)
-                }
+//                runOnUiThread {
+//                    controlView?.move(it.first, it.second)
+//                }
             }
             onStateCallback { // State
                 runOnUiThread {
@@ -120,28 +121,37 @@ class HandWritingActivity : AppCompatActivity() {
                 }
             }
             onTouchCallback { // Touch
-                runOnUiThread {
-                    val touchText = "触摸: ${(it.data)}"
-//                    touchView.text = touchText
-                    when (it.data) {
-                        RingTouchEvent.HOLD -> {
-                            if (!isRingTouchHold) {
-                                isRingTouchHold = true
-                                controlView?.beginWrite()
-                            }
-                            endHoldJob?.cancel()
-                            endHoldJob = CoroutineScope(Dispatchers.Main).launch {
-                                delay(300)
-                                controlView?.endWrite()
-                                isRingTouchHold = false
-                            }
-                        }
-                        RingTouchEvent.TAP -> {
-
-                        }
-                        else -> {}
-                    }
+//                runOnUiThread {
+//                    val touchText = "触摸: ${(it.data)}"
+//                    when (it.data) {
+//                        RingTouchEvent.HOLD -> {
+//                            if (!isRingTouchHold) {
+//                                isRingTouchHold = true
+//                                controlView?.beginWrite()
+//                            }
+//                            endHoldJob?.cancel()
+//                            endHoldJob = CoroutineScope(Dispatchers.Main).launch {
+//                                delay(300)
+//                                controlView?.endWrite()
+//                                isRingTouchHold = false
+//                            }
+//                        }
+//                        RingTouchEvent.TAP -> {
+//
+//                        }
+//                        else -> {}
+//                    }
+//                }
+            }
+            onPlaneEventCallback {
+                if (it == TouchState.DOWN) {
+                    controlView?.beginWrite()
+                } else {
+                    controlView?.endWrite()
                 }
+            }
+            onPlaneMoveCallback {
+                controlView?.move(it.first, it.second)
             }
         }
         ringManager.connect()

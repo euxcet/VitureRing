@@ -56,7 +56,6 @@ class MainControlView(context: Context, attrs: AttributeSet?, defStyleAttr: Int)
     }
 
     fun move(x: Float, y: Float) {
-        Log.e("Nuix", x.toString() + " " + y.toString())
         cursorX += x
         cursorY += y
         cursorX = max(min(cursorX, canvasWidth), 0f)
