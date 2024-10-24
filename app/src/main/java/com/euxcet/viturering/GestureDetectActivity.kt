@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.euxcet.viturering.utils.LanguageUtils
+import com.hcifuture.producer.detector.TouchState
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -85,6 +86,19 @@ class GestureDetectActivity : AppCompatActivity() {
 //                        }
 //                        else -> {}
 //                    }
+                }
+            }
+            onPlaneEventCallback {
+                runOnUiThread {
+                    val text = "桌面手势: ${LanguageUtils.planeChinese(it)}"
+                    if (it == TouchState.DOWN) {
+                        Log.e("Nuix", "Plane down")
+
+                    } else {
+                        Log.e("Nuix", "Plane up")
+
+                    }
+                    findViewById<TextView>(R.id.gesture_info).text = text
                 }
             }
         }

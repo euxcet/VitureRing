@@ -80,6 +80,16 @@ class ModelSurfaceView(context: Context, model: Model?) : GLSurfaceView(context)
         return true
     }
 
+    fun translate(dx: Float, dy: Float, dz: Float) {
+        renderer.translate(dx, dy, dz)
+        requestRender()
+    }
+
+    fun rotate(dx: Float, dy: Float) {
+        renderer.rotate(dx, dy)
+        requestRender()
+    }
+
     private fun getPinchDistance(event: MotionEvent): Float {
         val x = event.getX(0) - event.getX(1)
         val y = event.getY(0) - event.getY(1)

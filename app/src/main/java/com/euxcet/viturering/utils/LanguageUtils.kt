@@ -1,5 +1,6 @@
 package com.euxcet.viturering.utils
 
+import com.hcifuture.producer.detector.TouchState
 import com.hcifuture.producer.sensor.NuixSensorState
 import com.hcifuture.producer.sensor.data.RingTouchEvent
 
@@ -50,6 +51,14 @@ class LanguageUtils {
                 NuixSensorState.CONNECTING -> "连接中"
                 NuixSensorState.CONNECTED -> "已连接"
                 NuixSensorState.DISCONNECTED -> "已断连"
+            }
+        }
+
+        fun planeChinese(plane: TouchState): String {
+            return when(plane) {
+                TouchState.DOWN -> "下"
+                TouchState.UP -> "上"
+                else -> "Unknown"
             }
         }
     }
