@@ -49,8 +49,10 @@ class MainActivity : ComponentActivity() {
         ))
         setContentView(R.layout.main)
         findViewById<TextView>(R.id.toHome).setOnClickListener {
-//            val intent = Intent(this@MainActivity, HomeActivity::class.java)
-//            startActivity(intent)
+            val intent = Intent(this@MainActivity, HomeActivity::class.java)
+            startActivity(intent)
+        }
+        findViewById<TextView>(R.id.calibrate).setOnClickListener {
             ringManager.calibrate()
             Toast.makeText(this, "校准成功", Toast.LENGTH_SHORT).show()
         }

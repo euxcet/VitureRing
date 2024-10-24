@@ -12,9 +12,20 @@ class HomeIconAdapter : BaseAdapter() {
     private val iconList = listOf(
         Icon("writing", R.drawable.icon_writing, "手写输入"),
         Icon("gesture", R.drawable.icon_gesture, "手势识别"),
-        // Icon("model", R.drawable.icon_coordinate_system, "3D模型"),
+        Icon("model", R.drawable.icon_coordinate_system, "3D模型"),
         // Icon("setting", R.drawable.icon_setting, "设置")
     )
+
+    private var mFocusedPosition = -1
+
+    fun focusNext() {
+        mFocusedPosition = (mFocusedPosition + 1) % iconList.size
+        notifyDataSetChanged()
+    }
+
+    fun getCurFocusedPosition(): Int {
+        return mFocusedPosition
+    }
 
     override fun getCount(): Int {
         return iconList.size
@@ -33,6 +44,11 @@ class HomeIconAdapter : BaseAdapter() {
         val icon = iconList[position]
         view.findViewById<ImageView>(R.id.img).setImageResource(icon.iconRes)
         view.findViewById<TextView>(R.id.text).text = icon.title
+        if (position == mFocusedPosition) {
+            view.setBackgroundResource(R.drawable.shape_focused_back)
+        } else {
+            view.setBackgroundResource(0)
+        }
         return view
     }
 

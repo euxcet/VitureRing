@@ -112,8 +112,15 @@ class HomeActivity : AppCompatActivity() {
 //                            val intent = Intent(Settings.ACTION_SETTINGS)
 //                            startActivity(intent)
                         }
+                        "tap_air" -> {
+                            val curPos = iconAdapter.getCurFocusedPosition()
+                            if (curPos > 0) {
+                                onSelectIcon(curPos)
+                            }
+                        }
 
                         "circle_clockwise" -> {
+                            iconAdapter.focusNext()
 //                            val intent = Intent(this@HomeActivity, ObjectActivity::class.java)
 //                            startActivity(intent)
                         }

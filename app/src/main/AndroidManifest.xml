@@ -35,7 +35,7 @@
             android:exported="false"
             android:label="@string/title_activity_model3_dactivity"
             android:screenOrientation="landscape"
-            android:theme="@style/Theme.Commander.Fullscreen" />
+            android:theme="@style/Theme.AppCompat.DayNight.NoActionBar" />
         <activity
             android:name=".HandWritingActivity"
             android:exported="false"

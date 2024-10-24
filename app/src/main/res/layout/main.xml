@@ -27,12 +27,20 @@
                 android:textColor="#ffffff"
                 android:textSize="30sp" />
             <TextView
-                android:id="@+id/toHome"
+                android:id="@+id/calibrate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="校准"
                 android:textColor="@color/white"
                 android:textSize="26sp"/>
+            <TextView
+                android:id="@+id/toHome"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="桌面"
+                android:textColor="@color/white"
+                android:textSize="26sp"
+                android:layout_marginStart="20dp"/>
         </LinearLayout>
 
         <TextView
