@@ -12,6 +12,7 @@ import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import com.dmitrybrant.modelviewer.Model
 import com.dmitrybrant.modelviewer.ModelSurfaceView
+import com.dmitrybrant.modelviewer.obj.ObjModel
 import com.dmitrybrant.modelviewer.stl.StlModel
 import com.euxcet.viturering.databinding.ActivityModel3dBinding
 import com.euxcet.viturering.utils.LanguageUtils
@@ -58,8 +59,8 @@ class Model3DActivity : AppCompatActivity() {
 
     private fun loadSampleModel() {
         try {
-            assets.open("dragon.stl").use {
-                currentModel = StlModel(it)
+            assets.open("paimon.obj").use {
+                currentModel = ObjModel(it)
                 createNewModelView(currentModel)
             }
         } catch (e: Exception) {
