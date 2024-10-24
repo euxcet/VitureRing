@@ -126,7 +126,8 @@ class HomeActivity : AppCompatActivity() {
             }
             onMoveCallback { // Move
                 runOnUiThread {
-                    controlView?.move(it.first, it.second)
+                    Log.e("Nuix", "Move: $it")
+                    controlView?.move(it.first * (density.coerceAtLeast(2f)) / 2, it.second * (density.coerceAtLeast(2f)) / 2)
                 }
             }
             onStateCallback { // State

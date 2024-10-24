@@ -102,6 +102,25 @@ class HandwritingControlView(context: Context, attrs: AttributeSet?, defStyleAtt
     }
 
     /**
+     * 提交写字结果
+     */
+    fun submitWriting() : Bitmap? {
+        var bitmap: Bitmap? = null
+        if (pathList.size > 0) {
+            try {
+                bitmap = getWriteBitmap()?.let {
+                    onWriteSubmit?.invoke(it)
+                    it
+                }
+            } catch (e: Exception) {
+                Log.e("HandwritingControlView", "submit error", e)
+            }
+            pathList.clear()
+        }
+        return bitmap
+    }
+
+    /**
      * 开始写字
      */
     fun beginWrite() {
@@ -120,24 +139,10 @@ class HandwritingControlView(context: Context, attrs: AttributeSet?, defStyleAtt
     fun endWrite() {
         mode = HandwritingMode.CURSOR
         curPath?.let { path ->
-            var boundRect = RectF()
+            val boundRect = RectF()
             path.computeBounds(boundRect, true)
             if (boundRect.width() > 3 || boundRect.height() > 3) {
                 pathList.add(path)
-            }
-            if (pathList.size > 0) {
-                writeSubmitJob = CoroutineScope(Dispatchers.Main).launch {
-                    delay(1000 * 2)
-                    try {
-                        getWriteBitmap()?.let { bitmap ->
-                            onWriteSubmit?.invoke(bitmap)
-                        }
-                    } catch (e: Exception) {
-                        Log.e("HandwritingControlView", "submit error", e)
-                    }
-                    pathList.clear()
-                    postInvalidate()
-                }
             }
         }
         curPath = null
@@ -170,7 +175,7 @@ class HandwritingControlView(context: Context, attrs: AttributeSet?, defStyleAtt
         cursorX = max(min(cursorX, canvasWidth), 0f)
         cursorY = max(min(cursorY, canvasHeight), 0f)
         if (mode == HandwritingMode.WRITING) {
-            if (Math.abs(cursorX - lastSampleX) > 2 || Math.abs(cursorY - lastSampleY) > 2) {
+            if (Math.abs(cursorX - lastSampleX) > 1 || Math.abs(cursorY - lastSampleY) > 1) {
                 lastSampleX = cursorX
                 lastSampleY = cursorY
                 curPath?.lineTo(cursorX, cursorY)

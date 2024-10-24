@@ -2,6 +2,8 @@ package com.euxcet.viturering
 
 import android.content.pm.ActivityInfo
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.WindowManager
 import android.widget.EditText
@@ -39,6 +41,9 @@ class HandWritingActivity : AppCompatActivity() {
     }
 
     private var inputView: EditText? = null
+    private val density by lazy {
+        resources.displayMetrics.density
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,7 +75,7 @@ class HandWritingActivity : AppCompatActivity() {
         }
     }
 
-    private var isRingTouchHold = false
+    private var isRingTouchDown = false
     private var endHoldJob: Job? = null
 
     private fun connectRing() {
@@ -98,6 +103,7 @@ class HandWritingActivity : AppCompatActivity() {
                         "circle_clockwise" -> {
 //                            val intent = Intent(this@HomeActivity, ObjectActivity::class.java)
 //                            startActivity(intent)
+                            controlView?.submitWriting()
                         }
                         "circle_counterclockwise" -> {
                             finish()
@@ -109,9 +115,11 @@ class HandWritingActivity : AppCompatActivity() {
                 }
             }
             onMoveCallback { // Move
-//                runOnUiThread {
-//                    controlView?.move(it.first, it.second)
-//                }
+                runOnUiThread {
+                    if (!isRingTouchDown) {
+                        controlView?.move(it.first, it.second)
+                    }
+                }
             }
             onStateCallback { // State
                 runOnUiThread {
@@ -144,14 +152,27 @@ class HandWritingActivity : AppCompatActivity() {
 //                }
             }
             onPlaneEventCallback {
-                if (it == TouchState.DOWN) {
-                    controlView?.beginWrite()
-                } else {
-                    controlView?.endWrite()
+                runOnUiThread {
+                    if (it == TouchState.DOWN) {
+                        Log.e("Nuix", "Plane down")
+                        Handler(Looper.getMainLooper()).postDelayed({
+                            isRingTouchDown = true
+                        }, 500)
+                        controlView?.beginWrite()
+                    } else {
+                        isRingTouchDown = false
+                        controlView?.endWrite()
+                        Log.e("Nuix", "Plane up")
+                    }
                 }
             }
             onPlaneMoveCallback {
-                controlView?.move(it.first, it.second)
+                Log.e("Nuix", "Plane move: $it")
+                runOnUiThread {
+                    if (isRingTouchDown) {
+                        controlView?.move(it.first / density, it.second/ density)
+                    }
+                }
             }
         }
         ringManager.connect()
