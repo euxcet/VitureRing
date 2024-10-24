@@ -3,7 +3,7 @@ package com.dmitrybrant.modelviewer.util
 import android.opengl.GLES20
 import android.util.Log
 import androidx.annotation.RawRes
-import com.dmitrybrant.modelviewer.ModelViewerApplication
+import com.dmitrybrant.modelviewer.ModuleProxy
 import java.io.Closeable
 import java.io.IOException
 
@@ -109,7 +109,7 @@ object Util {
     }
 
     private val densityScalar: Float
-        get() = ModelViewerApplication.instance.resources.displayMetrics.density
+        get() = ModuleProxy.getInstance().getContext().resources.displayMetrics.density
 
     private fun loadShader(type: Int, shaderCode: String): Int {
         val shader = GLES20.glCreateShader(type)
@@ -129,7 +129,7 @@ object Util {
     }
 
     private fun readTextFileFromRawRes(@RawRes resourceId: Int): String {
-        val inputStream = ModelViewerApplication.instance.resources.openRawResource(resourceId)
+        val inputStream = ModuleProxy.getInstance().getContext().resources.openRawResource(resourceId)
         try {
             val bytes = ByteArray(inputStream.available())
             inputStream.read(bytes)

@@ -4,8 +4,8 @@ import android.opengl.GLES20
 import android.opengl.Matrix
 import com.dmitrybrant.modelviewer.IndexedModel
 import com.dmitrybrant.modelviewer.Light
-import com.dmitrybrant.modelviewer.R
 import com.dmitrybrant.modelviewer.util.Util
+import com.example.a3dviewer.R
 import java.io.*
 import java.nio.ByteBuffer
 import java.nio.ByteOrder

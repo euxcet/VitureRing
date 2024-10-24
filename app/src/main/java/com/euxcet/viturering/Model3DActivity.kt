@@ -3,17 +3,15 @@ package com.euxcet.viturering
 import androidx.appcompat.app.AppCompatActivity
 import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
-import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.view.MotionEvent
-import android.view.View
-import android.view.WindowInsets
+import android.util.Log
 import android.view.WindowManager
-import android.widget.LinearLayout
-import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
+import com.dmitrybrant.modelviewer.Model
+import com.dmitrybrant.modelviewer.ModelSurfaceView
+import com.dmitrybrant.modelviewer.stl.StlModel
 import com.euxcet.viturering.databinding.ActivityModel3dBinding
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -24,8 +22,14 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class Model3DActivity : AppCompatActivity() {
 
+    companion object {
+        const val TAG = "Model3DActivity"
+    }
+
     private lateinit var binding: ActivityModel3dBinding
     private val mainHandler = Handler(Looper.getMainLooper())
+    private var modelView: ModelSurfaceView? = null
+    private var currentModel: Model? = null
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,7 +41,27 @@ class Model3DActivity : AppCompatActivity() {
         setContentView(binding.root)
     }
 
-    override fun onPostCreate(savedInstanceState: Bundle?) {
-        super.onPostCreate(savedInstanceState)
+    private fun createNewModelView(model: Model?) {
+        if (modelView != null) {
+            binding.container.removeView(modelView)
+        }
+        modelView = ModelSurfaceView(this, model)
+        binding.container.addView(modelView, 0)
+    }
+
+    private fun loadSampleModel() {
+        try {
+            assets.open("dragon.stl").use {
+                currentModel = StlModel(it)
+                createNewModelView(currentModel)
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error loading sample model", e)
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        loadSampleModel()
     }
 }

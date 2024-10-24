@@ -3,6 +3,7 @@ package com.dmitrybrant.modelviewer
 import android.opengl.GLES20
 import android.opengl.Matrix
 import com.dmitrybrant.modelviewer.util.Util.compileProgram
+import com.example.a3dviewer.R
 import java.nio.FloatBuffer
 
 /*
