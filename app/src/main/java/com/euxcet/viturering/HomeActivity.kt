@@ -58,17 +58,18 @@ class HomeActivity : AppCompatActivity() {
         Log.e("Nuix", "on select Key: $key")
         when (key) {
             "writing" -> {
-                // todo go writing page
                 val intent = Intent(this@HomeActivity, HandWritingActivity::class.java)
                 startActivity(intent)
             }
 
             "gesture" -> {
-                // todo go gesture page
                 val intent = Intent(this@HomeActivity, GestureDetectActivity::class.java)
                 startActivity(intent)
             }
-
+            "model" -> {
+                val intent = Intent(this@HomeActivity, Model3DActivity::class.java)
+                startActivity(intent)
+            }
             "setting" -> {
                 val intent = Intent(Settings.ACTION_SETTINGS)
                 startActivity(intent)

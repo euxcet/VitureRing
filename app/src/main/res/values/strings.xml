@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">VitureRing</string>
     <string name="accessibility_service_description">Description</string>
+    <string name="title_activity_model3_dactivity">Model3DActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
 </resources>

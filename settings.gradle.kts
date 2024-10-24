@@ -16,3 +16,4 @@ dependencyResolutionManagement {
 rootProject.name = "VitureRing"
 include(":app")
 include(":producer")
+include(":3dviewer")
