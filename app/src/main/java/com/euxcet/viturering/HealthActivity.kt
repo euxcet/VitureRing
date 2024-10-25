@@ -1,96 +1,91 @@
 package com.euxcet.viturering
 
-import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.os.Bundle
-import android.provider.Settings
 import android.util.Log
+import android.view.View
 import android.view.WindowManager
-import android.widget.GridView
-import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.euxcet.viturering.databinding.ActivityHealthBinding
 import com.euxcet.viturering.utils.LanguageUtils
 import com.hcifuture.producer.sensor.data.RingTouchEvent
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class HomeActivity : AppCompatActivity() {
+class HealthActivity : AppCompatActivity() {
+
+    companion object {
+        const val MODE_HEART_RATE = 1
+        const val MODE_BLOOD_OXYGEN = 2
+    }
 
     @Inject
     lateinit var ringManager: RingManager
+    lateinit var binding: ActivityHealthBinding
 
-    private var controlView: MainControlView? = null
-    private val iconAdapter = HomeIconAdapter()
-    private var gridView: GridView? = null
-    private val density by lazy {
-        resources.displayMetrics.density
-    }
+    private var mode: Int = 0 // 1: heart rate, 2: blood oxygen
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContentView(R.layout.activity_home)
+        binding = ActivityHealthBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
         window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN)
-        gridView = findViewById<GridView>(R.id.grid).apply {
-            this.adapter = iconAdapter
-            setOnItemClickListener { _, _, position, _ ->
-                onSelectIcon(position)
-            }
+        binding.heartRate.setOnClickListener {
+            switchMode(MODE_HEART_RATE)
         }
-        controlView = findViewById<MainControlView>(R.id.control_view).apply {
-
+        binding.bloodOxygen.setOnClickListener {
+            switchMode(MODE_BLOOD_OXYGEN)
+        }
+        binding.cancel.setOnClickListener {
+            mode = 0
         }
     }
 
-    override fun onResume() {
-        super.onResume()
+    private fun switchMode(value: Int) {
+        if (mode == value) {
+            return
+        }
+        mode = value
+        if (mode == MODE_HEART_RATE) {
+            binding.heartRate.visibility = View.GONE
+            binding.bloodOxygen.visibility = View.GONE
+            binding.cancel.visibility = View.VISIBLE
+            beginHeartRateDetect()
+        } else if (mode == MODE_BLOOD_OXYGEN) {
+            binding.heartRate.visibility = View.GONE
+            binding.bloodOxygen.visibility = View.GONE
+            binding.cancel.visibility = View.VISIBLE
+            beginBloodOxygenDetect()
+        } else {
+            binding.heartRate.visibility = View.VISIBLE
+            binding.bloodOxygen.visibility = View.VISIBLE
+            binding.cancel.visibility = View.GONE
+            cancelDetect()
+        }
+    }
+
+    private fun beginHeartRateDetect() {
+        // TODO
+    }
+
+    private fun beginBloodOxygenDetect() {
+        // TODO
+    }
+
+    private fun cancelDetect() {
+
+    }
+
+    override fun onStart() {
+        super.onStart()
         connectRing()
-    }
-
-    private fun onSelectIcon(position: Int) {
-        val key = iconAdapter.getKey(position)
-        Log.e("Nuix", "on select Key: $key")
-        when (key) {
-            "writing" -> {
-                val intent = Intent(this@HomeActivity, HandWritingActivity::class.java)
-                startActivity(intent)
-            }
-
-            "gesture" -> {
-                val intent = Intent(this@HomeActivity, GestureDetectActivity::class.java)
-                startActivity(intent)
-            }
-            "model" -> {
-                val intent = Intent(this@HomeActivity, Model3DActivity::class.java)
-                startActivity(intent)
-            }
-            "setting" -> {
-                val intent = Intent(Settings.ACTION_SETTINGS)
-                startActivity(intent)
-            }
-            "health" -> {
-                val intent = Intent(this@HomeActivity, HealthActivity::class.java)
-                startActivity(intent)
-            }
-
-            else -> {
-            }
-        }
-    }
-
-    private fun selectCurPointIcon() {
-        val cursorPoint = controlView?.getCursorPoint()
-        gridView?.pointToPosition(cursorPoint?.x?.toInt() ?: 0, cursorPoint?.y?.toInt() ?: 0)?.let {
-            onSelectIcon(it)
-        }
-        Log.e("Nuix", "Cursor: $cursorPoint")
-
     }
 
     private fun connectRing() {
@@ -117,16 +112,11 @@ class HomeActivity : AppCompatActivity() {
 //                            startActivity(intent)
                         }
                         "tap_air" -> {
-                            val curPos = iconAdapter.getCurFocusedPosition()
-                            if (curPos > 0) {
-                                onSelectIcon(curPos)
-                            }
+
                         }
 
                         "circle_clockwise" -> {
-                            iconAdapter.focusNext()
-//                            val intent = Intent(this@HomeActivity, ObjectActivity::class.java)
-//                            startActivity(intent)
+
                         }
 
                         "touch_ring" -> {
@@ -137,8 +127,7 @@ class HomeActivity : AppCompatActivity() {
             }
             onMoveCallback { // Move
                 runOnUiThread {
-                    Log.e("Nuix", "Move: $it")
-                    controlView?.move(it.first * (density.coerceAtLeast(2f)) / 2, it.second * (density.coerceAtLeast(2f)) / 2)
+
                 }
             }
             onStateCallback { // State
@@ -159,7 +148,7 @@ class HomeActivity : AppCompatActivity() {
                         }
 
                         RingTouchEvent.TAP -> {
-                            selectCurPointIcon()
+
                         }
 
                         else -> {}
