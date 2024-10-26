@@ -18,6 +18,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.view.children
 import com.euxcet.viturering.utils.LanguageUtils
 import com.euxcet.viturering.utils.Permission
+import com.hcifuture.producer.common.network.http.HttpService
 import com.hcifuture.producer.sensor.NuixSensor
 import com.hcifuture.producer.sensor.data.RingTouchEvent
 import com.hcifuture.producer.sensor.external.ring.ringV2.RingV2

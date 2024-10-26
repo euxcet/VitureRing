@@ -1,6 +1,7 @@
 package com.euxcet.viturering
 
 import android.util.Log
+import com.hcifuture.producer.common.network.bean.CharacterResult
 import com.hcifuture.producer.detector.GestureDetector
 import com.hcifuture.producer.detector.OrientationDetector
 import com.hcifuture.producer.detector.TouchState
@@ -34,6 +35,7 @@ class RingManager @Inject constructor(
         internal var connectCallback: ((List<NuixSensor>) -> Unit)? = null
         internal var planeEventCallback: ((TouchState) -> Unit)? = null
         internal var planeMoveCallback: ((Pair<Float, Float>) -> Unit)? = null
+        internal var planeCharacterCallback: ((CharacterResult) -> Unit)? = null
 
         fun onTouchCallback(callback: ((RingTouchData) -> Unit)) {
             touchCallback = callback
@@ -61,6 +63,10 @@ class RingManager @Inject constructor(
 
         fun onPlaneMoveCallback(callback: ((Pair<Float, Float>) -> Unit)) {
             planeMoveCallback = callback
+        }
+
+        fun onPlaneCharacterCallback(callback: ((CharacterResult) -> Unit)) {
+            planeCharacterCallback = callback
         }
     }
 
@@ -207,6 +213,14 @@ class RingManager @Inject constructor(
             wordDetector.moveFlow.collect {
                 if (::listener.isInitialized) {
                     listener.planeMoveCallback?.invoke(it)
+                }
+            }
+        }
+
+        CoroutineScope(Dispatchers.Default).launch {
+            wordDetector.characterFlow.collect {
+                if (::listener.isInitialized) {
+                    listener.planeCharacterCallback?.invoke(it)
                 }
             }
         }

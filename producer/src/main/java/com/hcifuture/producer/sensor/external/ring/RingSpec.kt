@@ -28,6 +28,10 @@ class RingSpec {
             return NuixSensorSpec.flowName(sensor, "audio")
         }
 
+        fun ppgFlowName(sensor: NuixSensor): String {
+            return NuixSensorSpec.flowName(sensor, "ppg")
+        }
+
         fun statusFlowName(sensor: NuixSensor): String {
             return NuixSensorSpec.flowName(sensor, "status")
         }

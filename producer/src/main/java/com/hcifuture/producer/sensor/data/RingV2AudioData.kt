@@ -8,7 +8,7 @@ data class RingV2AudioData (
     val data: List<Byte>,
 ): BytesData {
     override fun toBytes(): ByteArray {
-        val byteBuffer = ByteBuffer.allocate(data.size * 4 + 8)
+        val byteBuffer = ByteBuffer.allocate(data.size)
         for (value in data) {
             byteBuffer.put(value)
         }

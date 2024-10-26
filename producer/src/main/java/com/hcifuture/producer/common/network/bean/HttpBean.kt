@@ -5,3 +5,7 @@ data class BaseBean<T>(
     var errorCode: Int,
     var errorMsg: String,
 )
+
+data class CharacterResult(
+    val result: List<String>,
+)

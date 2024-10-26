@@ -153,6 +153,9 @@ class HandWritingActivity : AppCompatActivity() {
             onPlaneMoveCallback {
                 controlView?.move(it.first, it.second)
             }
+            onPlaneCharacterCallback {
+                Log.e("Nuix", "result $it")
+            }
         }
         ringManager.connect()
     }

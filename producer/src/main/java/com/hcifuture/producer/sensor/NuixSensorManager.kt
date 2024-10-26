@@ -2,6 +2,8 @@ package com.hcifuture.producer.sensor
 
 import android.graphics.Path
 import android.util.Log
+import com.hcifuture.producer.common.network.bean.CharacterResult
+import com.hcifuture.producer.common.network.http.HttpService
 import com.hcifuture.producer.common.utils.FunctionUtils.flatten
 import com.hcifuture.producer.common.utils.FunctionUtils.reifiedValue
 import com.hcifuture.producer.sensor.audio.AudioProvider
@@ -28,6 +30,11 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.toRequestBody
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -43,7 +50,8 @@ class NuixSensorManager @Inject constructor(
     private val videoProvider: VideoProvider,
     private val audioProvider: AudioProvider,
     private val touchSensorProvider: TouchSensorProvider,
-    private val locationProvider: LocationProvider
+    private val locationProvider: LocationProvider,
+    private val httpService: HttpService,
 ) {
     private val scope = CoroutineScope(Dispatchers.Default)
     private val providers = listOf(
