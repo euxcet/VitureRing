@@ -35,6 +35,7 @@ class HealthActivity : AppCompatActivity() {
     lateinit var binding: ActivityHealthBinding
 
     private var mode: Int = 0 // 1: heart rate, 2: blood oxygen
+    private var focusedPosition = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,6 +53,7 @@ class HealthActivity : AppCompatActivity() {
         binding.cancel.setOnClickListener {
             switchMode(0)
         }
+        focusNext()
     }
 
     private fun switchMode(value: Int) {
@@ -74,6 +76,17 @@ class HealthActivity : AppCompatActivity() {
             binding.bloodOxygen.visibility = View.VISIBLE
             binding.cancel.visibility = View.GONE
             cancelDetect()
+        }
+    }
+
+    private fun focusNext() {
+        focusedPosition = (focusedPosition + 1) % 2
+        if (focusedPosition == 0) {
+            binding.heartRate.alpha = 1f
+            binding.bloodOxygen.alpha = 0.5f
+        } else {
+            binding.heartRate.alpha = 0.5f
+            binding.bloodOxygen.alpha = 1f
         }
     }
 
@@ -113,6 +126,11 @@ class HealthActivity : AppCompatActivity() {
         connectRing()
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        mockDataJob?.cancel()
+    }
+
     private fun onReceiveData(value: Int) {
         binding.waveView.showLine(value.toFloat())
         binding.waveValue.text = value.toString()
@@ -146,7 +164,7 @@ class HealthActivity : AppCompatActivity() {
                         }
 
                         "circle_clockwise" -> {
-
+                            focusNext()
                         }
                         "circle_counterclockwise" -> {
                             finish()
@@ -180,7 +198,14 @@ class HealthActivity : AppCompatActivity() {
                         }
 
                         RingTouchEvent.TAP -> {
-
+                            if (mode > 0) {
+                                switchMode(0)
+                            } else {
+                                when (focusedPosition) {
+                                    0 -> switchMode(MODE_HEART_RATE)
+                                    1 -> switchMode(MODE_BLOOD_OXYGEN)
+                                }
+                            }
                         }
 
                         else -> {}
