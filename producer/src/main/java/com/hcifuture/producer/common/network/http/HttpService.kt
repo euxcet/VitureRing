@@ -1,6 +1,7 @@
 package com.hcifuture.producer.common.network.http
 
 import com.hcifuture.producer.BuildConfig
+import com.hcifuture.producer.common.network.bean.CharacterResult
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Call
@@ -28,4 +29,10 @@ interface HttpService {
         @Part file: MultipartBody.Part,
         @Part("path") path: RequestBody,
     ): Call<Any>
+
+    @Multipart
+    @POST("/detect")
+    fun detectCharacter(
+        @Part("trajectory") trajectory: RequestBody,
+    ): Call<CharacterResult>
 }

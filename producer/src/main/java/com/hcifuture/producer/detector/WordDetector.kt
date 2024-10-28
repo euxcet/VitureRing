@@ -2,6 +2,9 @@ package com.hcifuture.producer.detector
 
 import android.content.res.AssetManager
 import android.util.Log
+import androidx.collection.FloatList
+import com.hcifuture.producer.common.network.bean.CharacterResult
+import com.hcifuture.producer.common.network.http.HttpService
 import com.hcifuture.producer.detector.utils.MadgwickFilter
 import com.hcifuture.producer.detector.utils.Quaternion
 import com.hcifuture.producer.sensor.NuixSensorManager
@@ -12,9 +15,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.pytorch.IValue
 import org.pytorch.LiteModuleLoader
 import org.pytorch.Tensor
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import javax.inject.Inject
 import kotlin.math.exp
 import kotlin.math.sqrt
@@ -26,21 +34,29 @@ enum class TouchState {
 class WordDetector @Inject constructor(
     private val assetManager: AssetManager,
     private val nuixSensorManager: NuixSensorManager,
+    private val httpService: HttpService,
 ) {
+    companion object {
+        const val GRAVITY = 9.76f
+    }
 
     private val scope = CoroutineScope(Dispatchers.Default)
     private val labels = arrayOf("ALWAYS_CONTACT", "ALWAYS_NO_CONTACT", "UP", "DOWN")
-    private val calculateFrequency: Float = 100.0f
     private val data = Array(6) { FloatArray(20) { 0.0f } }
     private val moveData = Array(13) { FloatArray(6) { 0.0f } }
     private val accXData = FloatArray(50)
     private var touchState = TouchState.UP
     val filter: MadgwickFilter = MadgwickFilter(0.1f, Quaternion(0.012f, -0.825f, 0.538f, 0.174f), 200.0f)
     private var orientation = filter.q.copy()
+    private val trajectory = mutableListOf<List<Float>>()
 
     val gestureFlow = MutableSharedFlow<TouchState>(replay = 0)
     val moveFlow = MutableSharedFlow<Pair<Float, Float>>(replay = 0)
+    val characterFlow = MutableSharedFlow<CharacterResult>(replay = 0)
 
+    var positionX = 0.0f
+    var positionY = 0.0f
+    var firstTimestamp = 0L
     var counter = 0
 
     fun getTouchEvent(state: TouchState): TouchState? {
@@ -101,7 +117,6 @@ class WordDetector @Inject constructor(
                     )
                 )
                 orientation = filter.q.copy()
-                val GRAVITY = 9.76f
                 for (i in 0 until 6) {
                     for (j in 0 until 12) {
                         moveData[j][i] = moveData[j + 1][i]
@@ -139,6 +154,28 @@ class WordDetector @Inject constructor(
                     }
                     if (event != null) {
                         gestureFlow.emit(event)
+                        if (event == TouchState.UP) {
+                            val path = trajectory.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+                            httpService.detectCharacter(path).enqueue(object: Callback<CharacterResult> {
+                                override fun onResponse(
+                                    call: Call<CharacterResult>,
+                                    response: Response<CharacterResult>
+                                ) {
+                                    response.body()?.let {
+                                        scope.launch {
+                                            characterFlow.emit(it)
+                                        }
+                                    }
+                                }
+
+                                override fun onFailure(call: Call<CharacterResult>, t: Throwable) {
+                                }
+                            })
+                            trajectory.clear()
+                            positionX = 0.0f
+                            positionY = 0.0f
+                            firstTimestamp = 0L
+                        }
                     }
                 }
                 if (touchState == TouchState.DOWN) {
@@ -157,13 +194,23 @@ class WordDetector @Inject constructor(
                     val gyrX = moveData[12][3]
                     val gyrY = moveData[12][4]
                     val gyrZ = moveData[12][5]
+                    var deltaX = output[0]
+                    var deltaY = output[1]
                     if (sqrt(gyrX * gyrX + gyrY * gyrY + gyrZ * gyrZ) < 0.1f) {
-                        moveFlow.emit(Pair(0f, 0f))
-                    } else {
-                        moveFlow.emit(Pair(output[0], output[1]))
+                        deltaX = 0.0f
+                        deltaY = 0.0f
                     }
+                    moveFlow.emit(Pair(deltaX, deltaY))
+                    positionX += deltaX
+                    positionY += deltaY
+                    val currentTimestamp = System.currentTimeMillis()
+                    if (firstTimestamp == 0L) {
+                        firstTimestamp = currentTimestamp
+                    }
+                    trajectory.add(listOf(positionX, positionY, (currentTimestamp - firstTimestamp) * 1.0f))
                 }
             }
         }
     }
+
 }

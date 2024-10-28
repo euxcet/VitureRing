@@ -1,7 +1,6 @@
 package com.hcifuture.producer.sensor.external.ring.ringV2
 
 import android.annotation.SuppressLint
-import android.bluetooth.BluetoothGatt
 import android.content.Context
 import android.util.Log
 import com.hcifuture.producer.recorder.Collector
@@ -13,10 +12,9 @@ import com.hcifuture.producer.sensor.data.RingImuData
 import com.hcifuture.producer.sensor.data.RingTouchData
 import com.hcifuture.producer.sensor.data.RingTouchEvent
 import com.hcifuture.producer.sensor.data.RingV2AudioData
+import com.hcifuture.producer.sensor.data.RingV2PPGData
 import com.hcifuture.producer.sensor.data.RingV2StatusData
 import com.hcifuture.producer.sensor.data.RingV2StatusType
-import com.hcifuture.producer.sensor.data.RingV2TouchEvent
-import com.hcifuture.producer.sensor.data.RingV2TouchEventData
 import com.hcifuture.producer.sensor.data.RingV2TouchRawData
 import com.hcifuture.producer.sensor.external.ring.RingSpec
 import kotlinx.coroutines.CoroutineScope
@@ -32,7 +30,6 @@ import kotlinx.coroutines.launch
 import no.nordicsemi.android.common.core.DataByteArray
 import no.nordicsemi.android.kotlin.ble.client.main.callback.ClientBleGatt
 import no.nordicsemi.android.kotlin.ble.client.main.service.ClientBleGattCharacteristic
-import no.nordicsemi.android.kotlin.ble.core.data.BleGattConnectionPriority
 import no.nordicsemi.android.kotlin.ble.core.data.BleWriteType
 import java.util.Arrays
 import kotlin.experimental.and
@@ -53,6 +50,7 @@ class RingV2(
     private val _touchRawFlow = MutableSharedFlow<RingV2TouchRawData>()
     private val _statusFlow = MutableSharedFlow<RingV2StatusData>()
     private val _audioFlow = MutableSharedFlow<RingV2AudioData>()
+    private val _ppgFlow = MutableSharedFlow<RingV2PPGData>()
     override val name: String = "RING[${deviceName}|${address}]"
     override val flows = mapOf(
         RingSpec.imuFlowName(this) to _imuFlow.asSharedFlow(),
@@ -60,13 +58,16 @@ class RingV2(
         RingSpec.touchRawFlowName(this) to _touchRawFlow.asSharedFlow(),
         RingSpec.statusFlowName(this) to _statusFlow.asSharedFlow(),
         RingSpec.audioFlowName(this) to _audioFlow.asSharedFlow(),
+        RingSpec.ppgFlowName(this) to _ppgFlow.asSharedFlow(),
         NuixSensorSpec.lifecycleFlowName(this) to lifecycleFlow.asStateFlow(),
     )
     override val defaultCollectors: Map<String, Collector> = mapOf<String, Collector>(
         RingSpec.imuFlowName(this) to
-                BytesDataCollector(listOf(this), listOf(_imuFlow.asSharedFlow()), "ringV2[${address}]Imu.bin"),
+                BytesDataCollector(listOf(this), listOf(_imuFlow.asSharedFlow()), "ringV2[${address}]IMU.bin"),
         RingSpec.touchEventFlowName(this) to
                 BytesDataCollector(listOf(this), listOf(_touchEventFlow.asSharedFlow()), "ringV2[${address}]TouchEvent.bin"),
+        RingSpec.ppgFlowName(this) to
+                BytesDataCollector(listOf(this), listOf(_touchEventFlow.asSharedFlow()), "ringV2[${address}]PPG.bin"),
     )
     private var count = 0
     private lateinit var countJob: Job
@@ -231,6 +232,22 @@ class RingV2(
                                 )
                             )
                         }
+                        cmd == 0x31.toByte() -> {
+                            _ppgFlow.emit(
+                                RingV2PPGData(
+                                    type = subCmd.toInt(),
+                                    raw = it.value.slice(4 until it.value.size)
+                                )
+                            )
+                        }
+                        cmd == 0x32.toByte() -> {
+                            _ppgFlow.emit(
+                                RingV2PPGData(
+                                    type = subCmd + 4,
+                                    raw = it.value.slice(4 until it.value.size)
+                                )
+                            )
+                        }
                     }
                 }.launchIn(scope)
                 write(RingV2Spec.GET_BATTERY_LEVEL)
@@ -266,7 +283,34 @@ class RingV2(
         delay(50)
     }
 
-    suspend  fun openMic() {
+    suspend fun openGreenPPG(
+        time: Int = 30,
+        freq: Int = 2, // [0: 25hz, 1: 50hz, 2: 100hz]
+        waveform: Boolean = true,
+        progress: Boolean = true,
+        rr: Boolean = true
+    ) {
+        write(RingV2Spec.openGreenPPG(time, freq, waveform, progress, rr))
+    }
+
+    suspend fun closeGreenPPG() {
+        write(RingV2Spec.CLOSE_GREEN_PPG)
+    }
+
+    suspend fun openRedPPG(
+        time: Int = 30,
+        freq: Int = 2, // [0: 25hz, 1: 50hz, 2: 100hz]
+        waveform: Boolean = true,
+        progress: Boolean = true,
+    ) {
+        write(RingV2Spec.openRedPPG(time, freq, waveform, progress))
+    }
+
+    suspend fun closeRedPPG() {
+        write(RingV2Spec.CLOSE_RED_PPG)
+    }
+
+    suspend fun openMic() {
         write(RingV2Spec.OPEN_MIC)
     }
 

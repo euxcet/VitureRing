@@ -174,6 +174,9 @@ class HandWritingActivity : AppCompatActivity() {
                     }
                 }
             }
+            onPlaneCharacterCallback {
+                Log.e("Nuix", "result $it")
+            }
         }
         ringManager.connect()
     }
