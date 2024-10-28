@@ -148,7 +148,9 @@ class HealthActivity : AppCompatActivity() {
                         "circle_clockwise" -> {
 
                         }
-
+                        "circle_counterclockwise" -> {
+                            finish()
+                        }
                         "touch_ring" -> {
                             //overlayView?.reset()
                         }
