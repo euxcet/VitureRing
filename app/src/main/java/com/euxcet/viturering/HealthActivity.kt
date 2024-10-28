@@ -14,6 +14,12 @@ import com.euxcet.viturering.databinding.ActivityHealthBinding
 import com.euxcet.viturering.utils.LanguageUtils
 import com.hcifuture.producer.sensor.data.RingTouchEvent
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -44,7 +50,7 @@ class HealthActivity : AppCompatActivity() {
             switchMode(MODE_BLOOD_OXYGEN)
         }
         binding.cancel.setOnClickListener {
-            mode = 0
+            switchMode(0)
         }
     }
 
@@ -71,21 +77,45 @@ class HealthActivity : AppCompatActivity() {
         }
     }
 
+    var mockDataJob: Job? = null
+    private fun startMockJob() {
+        mockDataJob?.cancel()
+        mockDataJob = CoroutineScope(Dispatchers.IO).launch {
+            withContext(Dispatchers.Main) {
+                binding.waveView.setWaveLineWidth(30)
+                binding.waveView.showLine(0f)
+            }
+            repeat(100) {
+                launch(Dispatchers.Main) {
+                    onReceiveData((Math.random() * 100).toInt())
+                }
+                delay(1000)
+            }
+        }
+    }
+
     private fun beginHeartRateDetect() {
         // TODO
+        startMockJob()
     }
 
     private fun beginBloodOxygenDetect() {
         // TODO
+        startMockJob()
     }
 
     private fun cancelDetect() {
-
+        mockDataJob?.cancel()
     }
 
     override fun onStart() {
         super.onStart()
         connectRing()
+    }
+
+    private fun onReceiveData(value: Int) {
+        binding.waveView.showLine(value.toFloat())
+        binding.waveValue.text = value.toString()
     }
 
     private fun connectRing() {
