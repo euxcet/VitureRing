@@ -115,6 +115,7 @@ class HandWritingActivity : AppCompatActivity() {
                         "snap" -> {
 //                            val intent = Intent(Settings.ACTION_SETTINGS)
 //                            startActivity(intent)
+                            wordsAdapter.setWords(listOf())
                         }
                         "circle_clockwise" -> {
 //                            val intent = Intent(this@HomeActivity, ObjectActivity::class.java)
