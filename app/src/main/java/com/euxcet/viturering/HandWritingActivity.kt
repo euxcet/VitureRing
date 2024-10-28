@@ -116,6 +116,7 @@ class HandWritingActivity : AppCompatActivity() {
 //                            val intent = Intent(Settings.ACTION_SETTINGS)
 //                            startActivity(intent)
                             wordsAdapter.setWords(listOf())
+                            controlView?.reset()
                         }
                         "circle_clockwise" -> {
 //                            val intent = Intent(this@HomeActivity, ObjectActivity::class.java)

@@ -91,6 +91,7 @@ class HandwritingControlView(context: Context, attrs: AttributeSet?, defStyleAtt
         mode = HandwritingMode.CURSOR
         curPath = null
         pathList.clear()
+        postInvalidate()
     }
 
 
