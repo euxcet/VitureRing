@@ -7,6 +7,8 @@ import android.os.Looper
 import android.util.Log
 import android.view.WindowManager
 import android.widget.EditText
+import android.widget.GridView
+import android.widget.SimpleAdapter
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -45,6 +47,10 @@ class HandWritingActivity : AppCompatActivity() {
         resources.displayMetrics.density
     }
 
+    private val wordsAdapter: WordAdapter by lazy {
+        WordAdapter()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -69,6 +75,12 @@ class HandWritingActivity : AppCompatActivity() {
         }
         connectRing()
         inputView = findViewById(R.id.input)
+        findViewById<GridView>(R.id.words_list).apply {
+            adapter = wordsAdapter
+            setOnItemClickListener { _, _, position, _ ->
+                chooseWord(position)
+            }
+        }
         CoroutineScope(Dispatchers.Main).launch {
             delay(1000)
             inputView?.requestFocus()
@@ -77,6 +89,11 @@ class HandWritingActivity : AppCompatActivity() {
 
     private var isRingTouchDown = false
     private var endHoldJob: Job? = null
+
+    private fun chooseWord(position: Int) {
+        val word = (wordsAdapter.getItem(position) as Map<*, *>)["word"] as String
+        inputView?.append(word)
+    }
 
     private fun connectRing() {
         ringManager.registerListener {
@@ -91,7 +108,6 @@ class HandWritingActivity : AppCompatActivity() {
                     val gestureText = "手势: ${LanguageUtils.gestureChinese(it)}"
                     when (it) {
                         "pinch" -> {
-
                         }
                         "middle_pinch" -> {
                             //overlayView?.switch()
@@ -103,7 +119,8 @@ class HandWritingActivity : AppCompatActivity() {
                         "circle_clockwise" -> {
 //                            val intent = Intent(this@HomeActivity, ObjectActivity::class.java)
 //                            startActivity(intent)
-                            controlView?.submitWriting()
+//                            controlView?.submitWriting()
+                            wordsAdapter.focusNext()
                         }
                         "circle_counterclockwise" -> {
                             finish()
@@ -129,27 +146,21 @@ class HandWritingActivity : AppCompatActivity() {
                 }
             }
             onTouchCallback { // Touch
-//                runOnUiThread {
-//                    val touchText = "触摸: ${(it.data)}"
-//                    when (it.data) {
-//                        RingTouchEvent.HOLD -> {
-//                            if (!isRingTouchHold) {
-//                                isRingTouchHold = true
-//                                controlView?.beginWrite()
-//                            }
-//                            endHoldJob?.cancel()
-//                            endHoldJob = CoroutineScope(Dispatchers.Main).launch {
-//                                delay(300)
-//                                controlView?.endWrite()
-//                                isRingTouchHold = false
-//                            }
-//                        }
-//                        RingTouchEvent.TAP -> {
-//
-//                        }
-//                        else -> {}
-//                    }
-//                }
+                runOnUiThread {
+                    val touchText = "触摸: ${(it.data)}"
+                    when (it.data) {
+                        RingTouchEvent.HOLD -> {
+
+                        }
+                        RingTouchEvent.TAP -> {
+                            val word = wordsAdapter.getCurFocusedWord()
+                            if (word != null) {
+                                inputView?.append(word)
+                            }
+                        }
+                        else -> {}
+                    }
+                }
             }
             onPlaneEventCallback {
                 runOnUiThread {
@@ -175,7 +186,10 @@ class HandWritingActivity : AppCompatActivity() {
                 }
             }
             onPlaneCharacterCallback {
-                Log.e("Nuix", "result $it")
+                runOnUiThread {
+                    Log.e("Nuix", "result $it")
+                    wordsAdapter.setWords(it.result)
+                }
             }
         }
         ringManager.connect()
