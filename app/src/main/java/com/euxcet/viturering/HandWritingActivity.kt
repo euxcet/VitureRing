@@ -135,9 +135,9 @@ class HandWritingActivity : AppCompatActivity() {
             }
             onMoveCallback { // Move
                 runOnUiThread {
-                    if (!isRingTouchDown) {
-                        controlView?.move(it.first, it.second)
-                    }
+//                    if (!isRingTouchDown) {
+//                        controlView?.move(it.first, it.second)
+//                    }
                 }
             }
             onStateCallback { // State
@@ -180,7 +180,7 @@ class HandWritingActivity : AppCompatActivity() {
                 }
             }
             onPlaneMoveCallback {
-                Log.e("Nuix", "Plane move: $it")
+//                Log.e("Nuix", "Plane move: $it")
                 runOnUiThread {
                     if (isRingTouchDown) {
                         controlView?.move(it.first / density, it.second/ density)
@@ -189,7 +189,7 @@ class HandWritingActivity : AppCompatActivity() {
             }
             onPlaneCharacterCallback {
                 runOnUiThread {
-                    Log.e("Nuix", "result $it")
+//                    Log.e("Nuix", "result $it")
                     wordsAdapter.setWords(it.result)
                 }
             }
