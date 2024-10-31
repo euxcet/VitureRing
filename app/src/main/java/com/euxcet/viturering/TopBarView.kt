@@ -62,7 +62,7 @@ class TopBarView(context: Context, attrs: AttributeSet?, defStyleAttr: Int): Fra
                                         )?.collect {
                                             if (it.type == RingV2StatusType.BATTERY_LEVEL) {
                                                 withContext(Dispatchers.Main) {
-                                                    binding.ringBattery.text = "戒指电量：${it.batteryLevel}"
+                                                    binding.ringBattery.text = "戒指电量：${if (it.batteryLevel > 100) 100 else it.batteryLevel }"
                                                 }
                                             }
                                         }
