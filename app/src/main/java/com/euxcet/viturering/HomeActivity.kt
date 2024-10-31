@@ -137,16 +137,11 @@ class HomeActivity : AppCompatActivity() {
             }
             onMoveCallback { // Move
                 runOnUiThread {
-                    Log.e("Nuix", "Move: $it")
                     controlView?.move(it.first * (density.coerceAtLeast(2f)) / 2, it.second * (density.coerceAtLeast(2f)) / 2)
                 }
             }
             onStateCallback { // State
-                runOnUiThread {
-//                    val statusText = "连接状态: ${LanguageUtils.statusChinese(it)}"
-                    // statusView.text = statusText
-                    findViewById<TextView>(R.id.ring_state).text = LanguageUtils.statusChinese(it)
-                }
+
             }
             onTouchCallback { // Touch
                 runOnUiThread {

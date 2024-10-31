@@ -6,35 +6,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".HandWritingActivity">
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <com.euxcet.viturering.TopBarView
         android:id="@+id/top_bar"
         android:layout_width="match_parent"
-        android:layout_height="30dp"
+        android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:background="#72000000">
-        <TextView
-            android:id="@+id/title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:textColor="#fff"
-            android:textSize="16sp"
-            android:text="手写输入"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
-        <TextView
-            android:id="@+id/ring_state"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="24dp"
-            android:textColor="#fff"
-            android:textSize="16sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        app:title="手写输入"/>
     <EditText
         android:id="@+id/input"
         android:layout_width="0dp"

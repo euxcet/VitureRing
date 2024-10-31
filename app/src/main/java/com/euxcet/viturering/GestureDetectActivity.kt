@@ -66,11 +66,7 @@ class GestureDetectActivity : AppCompatActivity() {
                 }
             }
             onStateCallback { // State
-                runOnUiThread {
-//                    val statusText = "连接状态: ${LanguageUtils.statusChinese(it)}"
-                    // statusView.text = statusText
-                    findViewById<TextView>(R.id.ring_state).text = LanguageUtils.statusChinese(it)
-                }
+
             }
             onTouchCallback { // Touch
                 runOnUiThread {

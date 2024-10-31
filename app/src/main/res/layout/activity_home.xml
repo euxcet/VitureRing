@@ -14,34 +14,12 @@
         android:numColumns="8"
         android:paddingHorizontal="30dp"
         android:paddingVertical="40dp"/>
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <com.euxcet.viturering.TopBarView
         android:layout_width="match_parent"
-        android:layout_height="30dp"
+        android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:background="#72000000">
-        <TextView
-            android:id="@+id/title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:textColor="#fff"
-            android:textSize="16sp"
-            android:text="主页"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
-        <TextView
-            android:id="@+id/ring_state"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="24dp"
-            android:textColor="#fff"
-            android:textSize="16sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        app:title="主页"/>
     <com.euxcet.viturering.MainControlView
         android:id="@+id/control_view"
         android:layout_width="match_parent"

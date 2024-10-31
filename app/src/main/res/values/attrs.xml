@@ -3,4 +3,7 @@
         <attr name="fullscreenBackgroundColor" format="color" />
         <attr name="fullscreenTextColor" format="color" />
     </declare-styleable>
+    <declare-styleable name="TopBarView">
+        <attr name="title" format="string" />
+    </declare-styleable>
 </resources>
