@@ -31,10 +31,15 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
-            android:name=".HealthActivity"
+            android:name=".VideoActivity"
             android:exported="false"
             android:screenOrientation="landscape"
             android:theme="@style/Theme.AppCompat.DayNight.NoActionBar"/>
+        <activity
+            android:name=".HealthActivity"
+            android:exported="false"
+            android:screenOrientation="landscape"
+            android:theme="@style/Theme.AppCompat.DayNight.NoActionBar" />
         <activity
             android:name=".Model3DActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"

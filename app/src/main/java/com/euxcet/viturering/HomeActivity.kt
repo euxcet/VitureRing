@@ -75,7 +75,8 @@ class HomeActivity : AppCompatActivity() {
                 startActivity(intent)
             }
             "health" -> {
-                val intent = Intent(this@HomeActivity, HealthActivity::class.java)
+//                val intent = Intent(this@HomeActivity, HealthActivity::class.java)
+                val intent = Intent(this@HomeActivity, VideoActivity::class.java)
                 startActivity(intent)
             }
 
