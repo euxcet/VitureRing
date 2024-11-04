@@ -10,6 +10,12 @@
         android:id="@+id/video_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
+    <com.euxcet.viturering.video.VideoControlView
+        android:id="@+id/video_control"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
     <com.euxcet.viturering.TopBarView
         android:id="@+id/top_bar"
         android:layout_width="match_parent"
