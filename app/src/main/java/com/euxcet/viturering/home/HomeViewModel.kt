@@ -1,0 +1,124 @@
+package com.euxcet.viturering.home
+
+import android.app.Application
+import android.content.Context
+import android.content.Intent
+import android.graphics.Color
+import android.provider.Settings
+import androidx.lifecycle.AndroidViewModel
+import com.euxcet.viturering.GestureDetectActivity
+import com.euxcet.viturering.HandWritingActivity
+import com.euxcet.viturering.Model3DActivity
+import com.euxcet.viturering.R
+import com.euxcet.viturering.VideoActivity
+
+class HomeViewModel(application: Application): AndroidViewModel(application) {
+
+    private val cardInfoList: MutableList<MutableList<CardInfo>> = mutableListOf()
+
+    fun getCardInfoList(pageNo: Int): List<CardInfo> {
+        if (pageNo >= cardInfoList.size) {
+            return emptyList()
+        }
+        return cardInfoList[pageNo].toList()
+    }
+
+    fun initCardInfoList() {
+
+        // game
+        val gameCardInfo = CardInfo(
+            key = "game",
+            title = "Game",
+            description = "Play the game",
+            icon = R.drawable.ic_launcher_foreground,
+            backgroundColor = Color.parseColor("#FF5722"),
+            hCells = 2,
+            vCells = 2,
+            hPosition = 0,
+            vPosition = 0
+        )
+        // video
+        val videoCardInfo = CardInfo(
+            key = "video",
+            title = "Video",
+            description = "Watch the video",
+            icon = R.drawable.ic_play,
+            backgroundColor = Color.parseColor("#FFC107"),
+            hCells = 4,
+            vCells = 4,
+            hPosition = 2,
+            vPosition = 0
+        )
+        // 3d model
+        val modelCardInfo = CardInfo(
+            key = "model",
+            title = "3D Model",
+            description = "View the 3D model",
+            icon = R.drawable.ic_coordinate_system,
+            backgroundColor = Color.parseColor("#FFC107"),
+            hCells = 2,
+            vCells = 2,
+            hPosition = 0,
+            vPosition = 2
+        )
+        cardInfoList.add(mutableListOf(gameCardInfo, videoCardInfo, modelCardInfo))
+        // fake pages
+        val fake1CardInfo = CardInfo(
+            key = "fake1",
+            title = "Fake1",
+            description = "Fake1",
+            icon = R.drawable.ic_launcher_foreground,
+            backgroundColor = Color.parseColor("#FF5722"),
+            hCells = 2,
+            vCells = 2,
+            hPosition = 0,
+            vPosition = 0
+        )
+
+        val fake2CardInfo = CardInfo(
+            key = "fake2",
+            title = "Fake2",
+            description = "Fake2",
+            icon = R.drawable.ic_launcher_foreground,
+            backgroundColor = Color.parseColor("#FF5722"),
+            hCells = 4,
+            vCells = 4,
+            hPosition = 2,
+            vPosition = 0
+        )
+
+        val fake3CardInfo = CardInfo(
+            key = "fake3",
+            title = "Fake3",
+            description = "Fake3",
+            icon = R.drawable.ic_launcher_foreground,
+            backgroundColor = Color.parseColor("#FF5722"),
+            hCells = 2,
+            vCells = 2,
+            hPosition = 0,
+            vPosition = 2
+        )
+
+        cardInfoList.add(mutableListOf(fake1CardInfo, fake2CardInfo, fake3CardInfo))
+    }
+
+    fun openCard(context: Context, key: String) {
+        // open card
+        when (key) {
+            "game" -> {
+                val intent = Intent(context, GestureDetectActivity::class.java)
+                context.startActivity(intent)
+            }
+            "model" -> {
+                val intent = Intent(context, Model3DActivity::class.java)
+                context.startActivity(intent)
+            }
+            "video" -> {
+                val intent = Intent(context, VideoActivity::class.java)
+                context.startActivity(intent)
+            }
+            else -> {
+            }
+        }
+    }
+}

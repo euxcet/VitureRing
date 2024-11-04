@@ -36,7 +36,7 @@ class MainControlView(context: Context, attrs: AttributeSet?, defStyleAttr: Int)
 
     private val cursorPaint = Paint().apply {
         isAntiAlias = true
-        color = Color(0x55A2A2A2).toArgb()
+        color = Color(0xC4D7D7D7).toArgb()
         style = Paint.Style.FILL_AND_STROKE
         strokeWidth = 1f
     }

@@ -13,8 +13,17 @@
         android:layout_height="match_parent"
         android:numColumns="8"
         android:paddingHorizontal="30dp"
-        android:paddingVertical="40dp"/>
+        android:paddingVertical="40dp"
+        android:visibility="gone"/>
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/view_pager"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@+id/top_bar"
+        app:layout_constraintBottom_toBottomOf="parent"
+        />
     <com.euxcet.viturering.TopBarView
+        android:id="@+id/top_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
