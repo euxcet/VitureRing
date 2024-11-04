@@ -68,6 +68,7 @@ class CardPageFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
+        isRequestOpenCard = false
     }
 
     private fun updateCardView() {
@@ -105,7 +106,7 @@ class CardPageFragment : Fragment() {
                 }
                 binding.root.addView(cardBinding.root)
                 cardBinding.root.setOnClickListener {
-                    homeViewModel?.openCard(requireContext(), cardInfo.key)
+                    openCard(cardInfo.key)
                 }
                 cardViewMap[cardInfo.key] = cardBinding.root
             }
@@ -137,9 +138,18 @@ class CardPageFragment : Fragment() {
             val right = left + view.width
             val bottom = top + view.height
             if (x in left until right && y in top until bottom) {
-                homeViewModel?.openCard(requireContext(), key)
+                openCard(key)
             }
         }
+    }
+
+    private var isRequestOpenCard = false
+    private fun openCard(key: String) {
+        if (isRequestOpenCard) {
+            return
+        }
+        isRequestOpenCard = true
+        homeViewModel?.openCard(requireContext(), key)
     }
 
     fun onCursorMove(x: Int, y: Int) {
