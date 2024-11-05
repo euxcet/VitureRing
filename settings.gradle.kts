@@ -19,3 +19,4 @@ rootProject.name = "VitureRing"
 include(":app")
 include(":producer")
 include(":3dviewer")
+include(":alpha_player")

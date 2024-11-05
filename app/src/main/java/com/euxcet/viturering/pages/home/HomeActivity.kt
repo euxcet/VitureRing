@@ -79,6 +79,18 @@ class HomeActivity : AppCompatActivity() {
         }
     }
 
+    private fun nextPage() {
+        if (viewPager.currentItem < homePageAdapter.itemCount - 1) {
+            viewPager.setCurrentItem(viewPager.currentItem + 1, true)
+        }
+    }
+
+    private fun previousPage() {
+        if (viewPager.currentItem > 0) {
+            viewPager.setCurrentItem(viewPager.currentItem - 1, true)
+        }
+    }
+
     private fun connectRing() {
         ringManager.registerListener {
             onGestureCallback { // Gesture
@@ -93,14 +105,16 @@ class HomeActivity : AppCompatActivity() {
                             }
                         }
                         "wave_left" -> {
-                            if (viewPager.currentItem > 0) {
-                                viewPager.setCurrentItem(viewPager.currentItem - 1, true)
-                            }
+                            previousPage()
                         }
                         "wave_right" -> {
-                            if (viewPager.currentItem < homePageAdapter.itemCount - 1) {
-                                viewPager.setCurrentItem(viewPager.currentItem + 1, true)
-                            }
+                            nextPage()
+                        }
+                        "circle_clockwise" -> {
+                            nextPage()
+                        }
+                        "circle_counterclockwise" -> {
+                            previousPage()
                         }
                         "snap" -> {
                             moveTaskToBack(true)

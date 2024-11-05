@@ -5,6 +5,20 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".pages.game.GameActivity">
-
+    tools:context=".pages.game.GameActivity"
+    android:background="@drawable/home_background">
+    <com.euxcet.viturering.pages.game.VideoGiftView
+        android:id="@+id/gif_view"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+    <com.euxcet.viturering.TopBarView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:title="游戏"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

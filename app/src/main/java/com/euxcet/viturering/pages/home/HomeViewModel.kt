@@ -8,6 +8,7 @@ import androidx.lifecycle.AndroidViewModel
 import com.euxcet.viturering.pages.gesture.GestureDetectActivity
 import com.euxcet.viturering.pages.model.Model3DActivity
 import com.euxcet.viturering.R
+import com.euxcet.viturering.pages.game.GameActivity
 import com.euxcet.viturering.pages.video.VideoActivity
 
 class HomeViewModel(application: Application): AndroidViewModel(application) {
@@ -104,7 +105,7 @@ class HomeViewModel(application: Application): AndroidViewModel(application) {
         // open card
         when (key) {
             "game" -> {
-                val intent = Intent(context, GestureDetectActivity::class.java)
+                val intent = Intent(context, GameActivity::class.java)
                 context.startActivity(intent)
             }
             "model" -> {

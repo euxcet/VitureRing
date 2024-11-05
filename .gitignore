@@ -16,3 +16,4 @@ local.properties
 .idea
 debug/
 app/**/res/raw/demo.mp4
+app/**/res/raw/game_wave_video.mp4
