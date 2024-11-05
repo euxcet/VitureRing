@@ -8,11 +8,15 @@ import android.util.Log
 import android.view.WindowManager
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.euxcet.viturering.databinding.ActivityVideoBinding
 import com.euxcet.viturering.utils.LanguageUtils
 import com.euxcet.viturering.video.VideoController
 import com.hcifuture.producer.sensor.data.RingTouchEvent
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -39,10 +43,6 @@ class VideoActivity : AppCompatActivity() {
             override fun seekTo(position: Long, mode: Int) {
                 binding.videoView.seekTo(position.toInt())
                 mediaPlayer?.seekTo(position, mode)
-                val hour = position / 1000 / 60 / 60
-                val minute = position / 1000 / 60 % 60
-                val second = position / 1000 % 60
-                Log.e("VideoActivity", "SeekTo: $hour:$minute:$second , raw: $position")
             }
 
             override fun setMute(isMute: Boolean) {
@@ -54,12 +54,7 @@ class VideoActivity : AppCompatActivity() {
             }
 
             override fun getCurrentPosition(): Int {
-                return binding.videoView.currentPosition.apply {
-                    val hour = this / 1000 / 60 / 60
-                    val minute = this / 1000 / 60 % 60
-                    val second = this / 1000 % 60
-                    Log.e("VideoActivity", "CurrentPosition: $hour:$minute:$second , raw: $this")
-                }
+                return binding.videoView.currentPosition
             }
         }
     }
@@ -92,13 +87,9 @@ class VideoActivity : AppCompatActivity() {
         binding.videoControl.pause()
     }
 
+    private var dismissToastJob: Job? = null
     private fun connectRing() {
         ringManager.registerListener {
-            onConnectCallback { // Connect
-                runOnUiThread {
-
-                }
-            }
             onGestureCallback { // Gesture
                 runOnUiThread {
                     Log.e("Nuix", "Gesture: $it")
@@ -106,43 +97,11 @@ class VideoActivity : AppCompatActivity() {
                     when (it) {
                         "pinch" -> {
                         }
-
-                        "middle_pinch" -> {
-                            //overlayView?.switch()
-                        }
-
                         "snap" -> {
-//                            val intent = Intent(Settings.ACTION_SETTINGS)
-//                            startActivity(intent)
-                            if (binding.videoView.isPlaying) {
-                                binding.videoView.pause()
-                            } else {
-                                binding.videoView.start()
-                            }
-                        }
-                        "tap_air" -> {
-
-                        }
-
-                        "circle_clockwise" -> {
-
-                        }
-                        "circle_counterclockwise" -> {
                             finish()
-                        }
-                        "touch_ring" -> {
-                            //overlayView?.reset()
                         }
                     }
                 }
-            }
-            onMoveCallback { // Move
-                runOnUiThread {
-
-                }
-            }
-            onStateCallback { // State
-
             }
             onTouchCallback { // Touch
                 runOnUiThread {
@@ -150,14 +109,28 @@ class VideoActivity : AppCompatActivity() {
                     Log.e("Nuix", "Touch: $touchText")
 //                    touchView.text = touchText
                     when (it.data) {
-                        RingTouchEvent.BOTTOM_BUTTON_CLICK -> {
-
-                        }
-
                         RingTouchEvent.TAP -> {
-
+                            binding.videoControl.switchPlay()
                         }
-
+                        RingTouchEvent.SWIPE_POSITIVE,
+                        RingTouchEvent.FLICK_POSITIVE -> {
+                            binding.videoControl.beginSeek()
+                            binding.videoControl.seek(10000)
+                            dismissToastJob?.cancel()
+                            dismissToastJob = lifecycleScope.launch {
+                                delay(1000)
+                                binding.videoControl.endSeek()
+                            }
+                        }
+                        RingTouchEvent.SWIPE_NEGATIVE,
+                        RingTouchEvent.FLICK_NEGATIVE -> {
+                            binding.videoControl.beginSeek()
+                            binding.videoControl.seek(-10000)
+                            dismissToastJob = lifecycleScope.launch {
+                                delay(1000)
+                                binding.videoControl.endSeek()
+                            }
+                        }
                         else -> {}
 //                    }
                     }

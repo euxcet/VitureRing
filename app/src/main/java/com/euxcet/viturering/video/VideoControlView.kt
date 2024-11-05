@@ -120,6 +120,11 @@ class VideoControlView(context: Context, attrs: AttributeSet?, defStyleAttr: Int
         videoController?.seekTo((binding.seekProgressBar.progress / 1000f * duration).toLong(), seekMode)
     }
 
+    fun seek(delta: Int) {
+        val curPlayTime = videoController?.getCurrentPosition() ?: 0
+        setCurrentTime(curPlayTime + delta)
+    }
+
     fun setCurrentTime(currentTime: Int) {
         setProgress(currentTime / duration.toFloat())
     }
