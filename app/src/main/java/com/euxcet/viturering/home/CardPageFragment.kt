@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
+import com.euxcet.viturering.R
 import com.euxcet.viturering.databinding.FragmentCardPageBinding
 import com.euxcet.viturering.databinding.ItemHomeCardBinding
 import com.euxcet.viturering.utils.Utils
@@ -160,10 +161,11 @@ class CardPageFragment : Fragment() {
             val top = location[1]
             val right = left + view.width
             val bottom = top + view.height
+            var visibility = View.INVISIBLE
             if (x in left until right && y in top until bottom) {
-                // todo highlight
-
+                visibility = View.VISIBLE
             }
+            view.findViewById<View>(R.id.mask).visibility = visibility
         }
     }
 
