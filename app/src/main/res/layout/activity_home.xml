@@ -5,7 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".HomeActivity"
+    tools:context=".pages.home.HomeActivity"
     android:background="@drawable/home_background">
     <GridView
         android:id="@+id/grid"
@@ -29,10 +29,10 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:title="主页"/>
-    <com.euxcet.viturering.MainControlView
+    <com.euxcet.viturering.pages.home.MainControlView
         android:id="@+id/control_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clickable="false">
-    </com.euxcet.viturering.MainControlView>
+    </com.euxcet.viturering.pages.home.MainControlView>
 </androidx.constraintlayout.widget.ConstraintLayout>

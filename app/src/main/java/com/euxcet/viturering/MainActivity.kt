@@ -16,14 +16,12 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.annotation.RequiresApi
 import androidx.core.view.children
+import com.euxcet.viturering.pages.home.HomeActivity
 import com.euxcet.viturering.utils.LanguageUtils
 import com.euxcet.viturering.utils.Permission
-import com.hcifuture.producer.common.network.http.HttpService
 import com.hcifuture.producer.sensor.NuixSensor
 import com.hcifuture.producer.sensor.data.RingTouchEvent
-import com.hcifuture.producer.sensor.external.ring.ringV2.RingV2
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Job
 import javax.inject.Inject
 
 @AndroidEntryPoint

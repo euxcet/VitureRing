@@ -1,4 +1,4 @@
-package com.euxcet.viturering
+package com.euxcet.viturering.pages.writing
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -13,11 +13,8 @@ import android.view.MotionEvent
 import android.view.View
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import com.euxcet.viturering.R
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlin.math.max
 import kotlin.math.min
 

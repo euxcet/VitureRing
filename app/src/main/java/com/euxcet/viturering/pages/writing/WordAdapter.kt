@@ -1,9 +1,10 @@
-package com.euxcet.viturering
+package com.euxcet.viturering.pages.writing
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
+import com.euxcet.viturering.R
 import com.euxcet.viturering.databinding.ItemGridWordBinding
 
 class WordAdapter: BaseAdapter() {

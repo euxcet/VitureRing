@@ -5,12 +5,12 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".VideoActivity">
+    tools:context=".pages.video.VideoActivity">
     <VideoView
         android:id="@+id/video_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
-    <com.euxcet.viturering.video.VideoControlView
+    <com.euxcet.viturering.pages.video.VideoControlView
         android:id="@+id/video_control"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

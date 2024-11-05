@@ -1,4 +1,4 @@
-package com.euxcet.viturering.home
+package com.euxcet.viturering.pages.home
 
 import android.util.Size
 import androidx.fragment.app.Fragment
@@ -23,7 +23,8 @@ class HomePageAdapter(activity: FragmentActivity, private val pageCount: Int) : 
     }
 
     override fun createFragment(position: Int): Fragment {
-        fragmentMap[position] = CardPageFragment.newInstance(position, pageSize?.width, pageSize?.height)
+        fragmentMap[position] =
+            CardPageFragment.newInstance(position, pageSize?.width, pageSize?.height)
         return fragmentMap[position]!!
     }
 

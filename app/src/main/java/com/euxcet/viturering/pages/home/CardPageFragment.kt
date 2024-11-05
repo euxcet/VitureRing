@@ -1,4 +1,4 @@
-package com.euxcet.viturering.home
+package com.euxcet.viturering.pages.home
 
 import android.content.Context
 import android.os.Bundle

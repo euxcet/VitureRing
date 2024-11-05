@@ -5,7 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".HealthActivity"
+    tools:context=".pages.health.HealthActivity"
     android:background="@drawable/home_background">
     <com.euxcet.viturering.TopBarView
         android:id="@+id/top_bar"

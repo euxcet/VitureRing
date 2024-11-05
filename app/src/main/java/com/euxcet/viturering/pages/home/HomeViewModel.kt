@@ -1,16 +1,14 @@
-package com.euxcet.viturering.home
+package com.euxcet.viturering.pages.home
 
 import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
-import android.provider.Settings
 import androidx.lifecycle.AndroidViewModel
-import com.euxcet.viturering.GestureDetectActivity
-import com.euxcet.viturering.HandWritingActivity
-import com.euxcet.viturering.Model3DActivity
+import com.euxcet.viturering.pages.gesture.GestureDetectActivity
+import com.euxcet.viturering.pages.model.Model3DActivity
 import com.euxcet.viturering.R
-import com.euxcet.viturering.VideoActivity
+import com.euxcet.viturering.pages.video.VideoActivity
 
 class HomeViewModel(application: Application): AndroidViewModel(application) {
 

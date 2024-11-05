@@ -1,4 +1,4 @@
-package com.euxcet.viturering.video
+package com.euxcet.viturering.pages.video
 
 interface VideoController {
     fun play()

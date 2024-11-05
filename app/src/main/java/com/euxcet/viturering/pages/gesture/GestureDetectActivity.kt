@@ -1,4 +1,4 @@
-package com.euxcet.viturering
+package com.euxcet.viturering.pages.gesture
 
 import android.content.pm.ActivityInfo
 import android.os.Bundle
@@ -7,8 +7,8 @@ import android.view.WindowManager
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import com.euxcet.viturering.R
+import com.euxcet.viturering.RingManager
 import com.euxcet.viturering.utils.LanguageUtils
 import com.hcifuture.producer.detector.TouchState
 import dagger.hilt.android.AndroidEntryPoint

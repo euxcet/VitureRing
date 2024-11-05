@@ -1,4 +1,4 @@
-package com.euxcet.viturering.home
+package com.euxcet.viturering.pages.home
 
 data class CardInfo(
     val key: String,

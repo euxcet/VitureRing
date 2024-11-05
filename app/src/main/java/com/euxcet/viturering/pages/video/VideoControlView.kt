@@ -1,4 +1,4 @@
-package com.euxcet.viturering.video
+package com.euxcet.viturering.pages.video
 
 import android.annotation.SuppressLint
 import android.content.Context

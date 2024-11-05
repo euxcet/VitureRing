@@ -1,4 +1,4 @@
-package com.euxcet.viturering
+package com.euxcet.viturering.pages.home
 
 import android.content.pm.ActivityInfo
 import android.os.Bundle
@@ -9,9 +9,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.widget.ViewPager2
-import com.euxcet.viturering.home.CardPageFragment
-import com.euxcet.viturering.home.HomePageAdapter
-import com.euxcet.viturering.home.HomeViewModel
+import com.euxcet.viturering.R
+import com.euxcet.viturering.RingManager
 import com.euxcet.viturering.utils.LanguageUtils
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject

@@ -1,4 +1,4 @@
-package com.euxcet.viturering
+package com.euxcet.viturering.pages.video
 
 import android.content.pm.ActivityInfo
 import android.media.MediaPlayer
@@ -9,9 +9,10 @@ import android.view.WindowManager
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.euxcet.viturering.R
+import com.euxcet.viturering.RingManager
 import com.euxcet.viturering.databinding.ActivityVideoBinding
 import com.euxcet.viturering.utils.LanguageUtils
-import com.euxcet.viturering.video.VideoController
 import com.hcifuture.producer.sensor.data.RingTouchEvent
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
@@ -27,7 +28,7 @@ class VideoActivity : AppCompatActivity() {
     private lateinit var binding: ActivityVideoBinding
     private var mediaPlayer: MediaPlayer? = null
     private val videoController: VideoController by lazy {
-        object:VideoController {
+        object: VideoController {
             override fun play() {
                 binding.videoView.start()
             }

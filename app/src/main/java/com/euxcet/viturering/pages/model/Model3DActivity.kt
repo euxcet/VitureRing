@@ -1,4 +1,4 @@
-package com.euxcet.viturering
+package com.euxcet.viturering.pages.model
 
 import androidx.appcompat.app.AppCompatActivity
 import android.annotation.SuppressLint
@@ -8,12 +8,11 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.WindowManager
-import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import com.dmitrybrant.modelviewer.Model
 import com.dmitrybrant.modelviewer.ModelSurfaceView
 import com.dmitrybrant.modelviewer.obj.ObjModel
-import com.dmitrybrant.modelviewer.stl.StlModel
+import com.euxcet.viturering.RingManager
 import com.euxcet.viturering.databinding.ActivityModel3dBinding
 import com.euxcet.viturering.utils.LanguageUtils
 import com.hcifuture.producer.detector.TouchState
@@ -95,14 +94,12 @@ class Model3DActivity : AppCompatActivity() {
                             //overlayView?.switch()
                         }
                         "snap" -> {
-//                            val intent = Intent(Settings.ACTION_SETTINGS)
-//                            startActivity(intent)
+                            finish()
                         }
                         "circle_clockwise" -> {
 
                         }
                         "circle_counterclockwise" -> {
-                            finish()
                         }
                         "touch_ring" -> {
                             //overlayView?.reset()
