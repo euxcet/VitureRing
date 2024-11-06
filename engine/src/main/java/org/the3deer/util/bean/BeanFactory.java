@@ -191,7 +191,6 @@ public class BeanFactory {
                 // inject the dependencies
                 for (Field field : currentClass.getDeclaredFields()) {
                     field.setAccessible(true);
-
                     // check
                     if (field.getAnnotation(Inject.class) == null) continue;
 

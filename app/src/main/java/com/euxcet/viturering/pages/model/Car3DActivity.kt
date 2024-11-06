@@ -16,6 +16,10 @@ import com.hcifuture.producer.detector.TouchState
 import com.hcifuture.producer.sensor.data.RingTouchEvent
 import dagger.hilt.android.AndroidEntryPoint
 import org.the3deer.android_3d_model_engine.ModelEngine
+import org.the3deer.android_3d_model_engine.drawer.BoundingBoxRenderer
+import org.the3deer.android_3d_model_engine.gui.GUISystem
+import org.the3deer.android_3d_model_engine.model.Camera
+import org.the3deer.android_3d_model_engine.model.Constants
 import org.the3deer.android_3d_model_engine.services.SceneLoader
 import org.the3deer.android_3d_model_engine.view.GLFragment
 import org.the3deer.android_3d_model_engine.view.GLSurfaceView
@@ -43,6 +47,7 @@ class Car3DActivity : AppCompatActivity() {
         binding = ActivityCar3DactivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
         modelEngine = ModelEngine.newInstance(this, savedInstanceState, null)
+        modelEngine.init()
         loadModel()
     }
 
@@ -57,7 +62,9 @@ class Car3DActivity : AppCompatActivity() {
         modelEngine.beanFactory.addOrReplace("surface", GLSurfaceView(this))
         modelEngine.beanFactory.addOrReplace("fragment_gl", GLFragment())
         modelEngine.beanFactory.addOrReplace("scene_0.loader", SceneLoader())
-        modelEngine.init()
+        modelEngine.beanFactory.addOrReplace("20.scene_0.camera", Camera(Constants.UNIT))
+        modelEngine.beanFactory.addOrReplace("80.gui.renderer", GUISystem().apply { isEnabled = false })
+        modelEngine.beanFactory.addOrReplace("50.renderer4.boundingBoxDrawer", BoundingBoxRenderer().apply { isEnabled = false })
         modelEngine.refresh()
         supportFragmentManager.beginTransaction().replace(binding.mainContainer.id, modelEngine.glFragment).commit()
     }
