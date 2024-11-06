@@ -58,7 +58,7 @@ class Model3DActivity : AppCompatActivity() {
 
     private fun loadSampleModel() {
         try {
-            assets.open("paimon.obj").use {
+            assets.open("models/Paimon.obj").use {
                 currentModel = ObjModel(it)
                 createNewModelView(currentModel)
             }

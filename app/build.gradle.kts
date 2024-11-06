@@ -84,6 +84,7 @@ dependencies {
     implementation(files("libs/TrackerClientPlus.jar"))
     implementation(project(":producer"))
     implementation(project(":3dviewer"))
+    implementation(project(":engine"))
     implementation("cn.xfyun:websdk-java-ocr:2.0.3")
     implementation("com.github.Giftedcat:Waveform:1.3.2")
     implementation(project(":alpha_player"))

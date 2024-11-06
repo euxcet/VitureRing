@@ -5,10 +5,9 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import androidx.lifecycle.AndroidViewModel
-import com.euxcet.viturering.pages.gesture.GestureDetectActivity
-import com.euxcet.viturering.pages.model.Model3DActivity
 import com.euxcet.viturering.R
 import com.euxcet.viturering.pages.game.GameActivity
+import com.euxcet.viturering.pages.model.Car3DActivity
 import com.euxcet.viturering.pages.video.VideoActivity
 
 class HomeViewModel(application: Application): AndroidViewModel(application) {
@@ -50,7 +49,7 @@ class HomeViewModel(application: Application): AndroidViewModel(application) {
         )
         // 3d model
         val modelCardInfo = CardInfo(
-            key = "model",
+            key = "models",
             title = "3D",
             description = "View the 3D model",
             icon = R.drawable.ic_coordinate_system,
@@ -108,8 +107,8 @@ class HomeViewModel(application: Application): AndroidViewModel(application) {
                 val intent = Intent(context, GameActivity::class.java)
                 context.startActivity(intent)
             }
-            "model" -> {
-                val intent = Intent(context, Model3DActivity::class.java)
+            "models" -> {
+                val intent = Intent(context, Car3DActivity::class.java)
                 context.startActivity(intent)
             }
             "video" -> {
