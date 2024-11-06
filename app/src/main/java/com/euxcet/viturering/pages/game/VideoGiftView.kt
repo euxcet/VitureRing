@@ -52,13 +52,13 @@ class VideoGiftView @JvmOverloads constructor(
         }
     }
 
-    fun startVideoGift(filePath: String) {
-        if (TextUtils.isEmpty(filePath)) {
+    fun startVideoGift(configModel: ConfigModel, baseDirPath: String) {
+        if (configModel.portraitItem == null || configModel.landscapeItem == null) {
+            Log.e(TAG, "startVideoGift: configModel is invalid.")
             return
         }
-        val configModel = ConfigModel.parseConfigModel(filePath) ?: return
         val dataSource = DataSource()
-            .setBaseDir(filePath)
+            .setBaseDir(baseDirPath)
             .setPortraitPath(configModel.portraitItem!!.path!!, configModel.portraitItem!!.alignMode)
             .setLandscapePath(configModel.landscapeItem!!.path!!, configModel.landscapeItem!!.alignMode)
             .setLooping(false)
