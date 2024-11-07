@@ -2,13 +2,16 @@ package com.euxcet.viturering.pages.model
 
 import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.view.View
 import android.view.WindowManager
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import com.euxcet.viturering.R
 import com.euxcet.viturering.RingManager
 import com.euxcet.viturering.databinding.ActivityCar3DactivityBinding
 import com.euxcet.viturering.utils.LanguageUtils
@@ -76,6 +79,29 @@ class Car3DActivity : AppCompatActivity() {
 
     private var isTouchDown = false
 
+    private var isPlaying = false
+    private fun playVideo(resId: Int) {
+        val path = "android.resource://" + packageName + "/" + resId
+        binding.videoContainer.visibility = View.VISIBLE
+        binding.videoView.visibility = View.VISIBLE
+        binding.videoView.setOnPreparedListener { mp ->
+            binding.videoView.start()
+            isPlaying = true
+        }
+        binding.videoView.setOnCompletionListener {
+            binding.videoContainer.visibility = View.GONE
+            binding.videoView.visibility = View.GONE
+            isPlaying = false
+        }
+        binding.videoView.setOnErrorListener { mp, what, extra ->
+            binding.videoContainer.visibility = View.GONE
+            binding.videoView.visibility = View.GONE
+            isPlaying = false
+            true
+        }
+        binding.videoView.setVideoURI(Uri.parse(path))
+    }
+
     private fun connectRing() {
         ringManager.registerListener {
             onConnectCallback { // Connect
@@ -98,9 +124,10 @@ class Car3DActivity : AppCompatActivity() {
                             finish()
                         }
                         "circle_clockwise" -> {
-
+                            playVideo(R.raw.car_racing)
                         }
                         "circle_counterclockwise" -> {
+                            playVideo(R.raw.car_window)
                         }
                         "touch_ring" -> {
                             //overlayView?.reset()
