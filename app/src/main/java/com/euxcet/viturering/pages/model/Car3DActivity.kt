@@ -18,15 +18,21 @@ import com.euxcet.viturering.utils.LanguageUtils
 import com.hcifuture.producer.detector.TouchState
 import com.hcifuture.producer.sensor.data.RingTouchEvent
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.the3deer.android_3d_model_engine.ModelEngine
 import org.the3deer.android_3d_model_engine.drawer.BoundingBoxRenderer
-import org.the3deer.android_3d_model_engine.gui.GUISystem
 import org.the3deer.android_3d_model_engine.model.Camera
 import org.the3deer.android_3d_model_engine.model.Constants
+import org.the3deer.android_3d_model_engine.model.Scene
 import org.the3deer.android_3d_model_engine.services.SceneLoader
 import org.the3deer.android_3d_model_engine.view.GLFragment
 import org.the3deer.android_3d_model_engine.view.GLSurfaceView
 import org.the3deer.util.android.ContentUtils
+import org.the3deer.util.math.Quaternion
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -66,7 +72,7 @@ class Car3DActivity : AppCompatActivity() {
         modelEngine.beanFactory.addOrReplace("fragment_gl", GLFragment())
         modelEngine.beanFactory.addOrReplace("scene_0.loader", SceneLoader())
         modelEngine.beanFactory.addOrReplace("20.scene_0.camera", Camera(Constants.UNIT))
-        modelEngine.beanFactory.addOrReplace("80.gui.renderer", GUISystem().apply { isEnabled = false })
+        // modelEngine.beanFactory.addOrReplace("80.gui.renderer", GUISystem().apply { isEnabled = false })
         modelEngine.beanFactory.addOrReplace("50.renderer4.boundingBoxDrawer", BoundingBoxRenderer().apply { isEnabled = false })
         modelEngine.refresh()
         supportFragmentManager.beginTransaction().replace(binding.mainContainer.id, modelEngine.glFragment).commit()
@@ -102,6 +108,7 @@ class Car3DActivity : AppCompatActivity() {
         binding.videoView.setVideoURI(Uri.parse(path))
     }
 
+    private var rotateJob: Job? = null
     private fun connectRing() {
         ringManager.registerListener {
             onConnectCallback { // Connect
@@ -115,7 +122,28 @@ class Car3DActivity : AppCompatActivity() {
                     val gestureText = "手势: ${LanguageUtils.gestureChinese(it)}"
                     when (it) {
                         "pinch" -> {
-
+                            // modelEngine.rotate(1.57f)
+                            if (rotateJob != null) {
+                                rotateJob?.cancel()
+                                rotateJob = null
+                                return@runOnUiThread
+                            }
+                            // 操作模型
+                            val scene = modelEngine.beanFactory.find(Scene::class.java)
+                            val objects = scene.objects
+                            if (objects.size > 0) {
+                                val camera = scene.camera
+                                val model = objects[0]
+                                val delayTime = 1000f / 60
+                                val speed = Math.PI.toFloat() / 0.2f
+                                rotateJob = CoroutineScope(Dispatchers.Main).launch {
+                                    while(true) {
+                                        val q = Quaternion.getQuaternion(floatArrayOf(0f, 1f, 0f, 1f), speed / 60)
+                                        model.setOrientation(Quaternion.multiply(model.orientation, q.normalize()))
+                                        delay(delayTime.toLong())
+                                    }
+                                }
+                            }
                         }
                         "middle_pinch" -> {
                             //overlayView?.switch()

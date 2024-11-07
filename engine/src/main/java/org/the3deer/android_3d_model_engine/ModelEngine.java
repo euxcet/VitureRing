@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import org.the3deer.android_3d_model_engine.camera.CameraController;
 import org.the3deer.android_3d_model_engine.collision.CollisionController;
 import org.the3deer.android_3d_model_engine.controller.TouchController;
+import org.the3deer.android_3d_model_engine.controller.TouchEvent;
 import org.the3deer.android_3d_model_engine.drawer.BoundingBoxRenderer;
 import org.the3deer.android_3d_model_engine.drawer.LightBulbRenderer;
 import org.the3deer.android_3d_model_engine.drawer.SceneRenderer;
@@ -105,6 +106,10 @@ public class ModelEngine {
 
     public PreferenceFragment getPreferenceFragment(){
         return beanFactory.find(PreferenceFragment.class);
+    }
+
+    public void rotate(float angle) {
+        beanFactory.find(CameraController.class).rotate(angle);
     }
 
     public void init(){

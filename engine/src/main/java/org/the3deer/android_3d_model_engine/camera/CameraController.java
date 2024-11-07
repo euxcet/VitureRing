@@ -218,6 +218,9 @@ public final class CameraController implements Camera.Controller, EventListener,
         this.handler.enable();
     }
 
+    public void rotate(float angle){
+        handler.rotate(angle);
+    }
 
     @Override
     public boolean onEvent(EventObject event) {

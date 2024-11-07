@@ -105,15 +105,9 @@ class HomeActivity : AppCompatActivity() {
                             }
                         }
                         "wave_left" -> {
-                            previousPage()
+                            nextPage()
                         }
                         "wave_right" -> {
-                            nextPage()
-                        }
-                        "circle_clockwise" -> {
-                            nextPage()
-                        }
-                        "circle_counterclockwise" -> {
                             previousPage()
                         }
                         "snap" -> {
