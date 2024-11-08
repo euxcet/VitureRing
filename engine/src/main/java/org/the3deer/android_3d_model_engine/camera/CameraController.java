@@ -2,6 +2,7 @@ package org.the3deer.android_3d_model_engine.camera;
 
 
 import android.content.Context;
+import android.opengl.Matrix;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -23,6 +24,7 @@ import org.the3deer.android_3d_model_engine.preferences.PreferenceAdapter;
 import org.the3deer.android_3d_model_engine.toolbar.MenuAdapter;
 import org.the3deer.util.bean.BeanFactory;
 import org.the3deer.util.event.EventListener;
+import org.the3deer.util.math.Math3DUtils;
 
 import java.util.Arrays;
 import java.util.EventObject;
@@ -220,6 +222,15 @@ public final class CameraController implements Camera.Controller, EventListener,
 
     public void rotate(float angle){
         handler.rotate(angle);
+    }
+
+    public void move(float dx, float dy) {
+        float dx1 = dx;
+        float dy1 = dy;
+        float max = Math.max(screen.getWidth(), screen.getHeight());
+        dx1 = (float) (dx1 / max * Math.PI * 2);
+        dy1 = (float) (dy1 / max * Math.PI * 2);
+        handler.move(dx1, dy1);
     }
 
     @Override

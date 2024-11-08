@@ -3,6 +3,7 @@ package com.euxcet.viturering.pages.model
 import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
 import android.net.Uri
+import android.opengl.Matrix
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -24,6 +25,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.the3deer.android_3d_model_engine.ModelEngine
+import org.the3deer.android_3d_model_engine.camera.CameraController
 import org.the3deer.android_3d_model_engine.drawer.BoundingBoxRenderer
 import org.the3deer.android_3d_model_engine.model.Camera
 import org.the3deer.android_3d_model_engine.model.Constants
@@ -32,6 +34,7 @@ import org.the3deer.android_3d_model_engine.services.SceneLoader
 import org.the3deer.android_3d_model_engine.view.GLFragment
 import org.the3deer.android_3d_model_engine.view.GLSurfaceView
 import org.the3deer.util.android.ContentUtils
+import org.the3deer.util.math.Math3DUtils
 import org.the3deer.util.math.Quaternion
 import javax.inject.Inject
 
@@ -76,6 +79,8 @@ class Car3DActivity : AppCompatActivity() {
         modelEngine.beanFactory.addOrReplace("50.renderer4.boundingBoxDrawer", BoundingBoxRenderer().apply { isEnabled = false })
         modelEngine.refresh()
         supportFragmentManager.beginTransaction().replace(binding.mainContainer.id, modelEngine.glFragment).commit()
+        scene = modelEngine.beanFactory.find(Scene::class.java)
+        cameraController = modelEngine.beanFactory.find(CameraController::class.java)
     }
 
     override fun onStart() {
@@ -109,6 +114,9 @@ class Car3DActivity : AppCompatActivity() {
     }
 
     private var rotateJob: Job? = null
+    private var isPinchDown = false
+    private var scene: Scene? = null
+    private var cameraController: CameraController? = null
     private fun connectRing() {
         ringManager.registerListener {
             onConnectCallback { // Connect
@@ -129,21 +137,27 @@ class Car3DActivity : AppCompatActivity() {
                                 return@runOnUiThread
                             }
                             // 操作模型
-                            val scene = modelEngine.beanFactory.find(Scene::class.java)
-                            val objects = scene.objects
-                            if (objects.size > 0) {
-                                val camera = scene.camera
-                                val model = objects[0]
-                                val delayTime = 1000f / 60
-                                val speed = Math.PI.toFloat() / 0.2f
-                                rotateJob = CoroutineScope(Dispatchers.Main).launch {
-                                    while(true) {
-                                        val q = Quaternion.getQuaternion(floatArrayOf(0f, 1f, 0f, 1f), speed / 60)
-                                        model.setOrientation(Quaternion.multiply(model.orientation, q.normalize()))
-                                        delay(delayTime.toLong())
+                            scene?.objects?.let { objects ->
+                                if (objects.size > 0) {
+                                    val camera = scene?.camera
+                                    val model = objects[0]
+                                    val delayTime = 1000f / 60
+                                    val speed = Math.PI.toFloat() / 0.2f
+                                    rotateJob = CoroutineScope(Dispatchers.Main).launch {
+                                        while(true) {
+                                            val q = Quaternion.getQuaternion(floatArrayOf(0f, 1f, 0f, 1f), speed / 60)
+                                            model.setOrientation(Quaternion.multiply(model.orientation, q.normalize()))
+                                            delay(delayTime.toLong())
+                                        }
                                     }
                                 }
                             }
+                        }
+                        "pinch_down" -> {
+                            isPinchDown = true
+                        }
+                        "pinch_up" -> {
+                            isPinchDown = false
                         }
                         "snap" -> {
                             finish()
@@ -168,7 +182,9 @@ class Car3DActivity : AppCompatActivity() {
             }
             onMoveCallback { // Move
                 runOnUiThread {
-
+                    if (isPinchDown) {
+                        cameraController?.move(it.first, it.second)
+                    }
                 }
             }
             onStateCallback { // State
