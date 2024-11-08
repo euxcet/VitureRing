@@ -108,9 +108,11 @@ class HomeActivity : AppCompatActivity() {
                                 performFragmentClick(p.x.toInt(), p.y.toInt())
                             }
                         }
+                        "slide_left",
                         "wave_left" -> {
                             nextPage()
                         }
+                        "slide_right",
                         "wave_right" -> {
                             previousPage()
                         }
