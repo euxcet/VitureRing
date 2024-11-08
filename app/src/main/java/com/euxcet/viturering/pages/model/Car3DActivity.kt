@@ -118,6 +118,7 @@ class Car3DActivity : AppCompatActivity() {
     private var isPinchDown = false
     private var scene: Scene? = null
     private var cameraController: CameraController? = null
+    private var rotateMode: Int = 0 // 0: y轴旋转 1: x轴旋转
     private fun connectRing() {
         ringManager.registerListener {
             onConnectCallback { // Connect
@@ -187,7 +188,11 @@ class Car3DActivity : AppCompatActivity() {
             onMoveCallback { // Move
                 runOnUiThread {
                     if (isPinchDown) {
-                        cameraController?.move(it.first, it.second)
+                        if (rotateMode == 0) {
+                            cameraController?.move(it.first, 0f)
+                        } else {
+                            cameraController?.move(0f, it.second)
+                        }
                     }
                 }
             }
@@ -201,6 +206,7 @@ class Car3DActivity : AppCompatActivity() {
                         RingTouchEvent.HOLD -> {
                         }
                         RingTouchEvent.TAP -> {
+                            rotateMode = if (rotateMode == 0) 1 else 0
                         }
                         else -> {}
                     }
