@@ -163,9 +163,8 @@ class GameActivity : AppCompatActivity() {
             onGestureCallback { // Gesture
                 runOnUiThread {
                     Log.e("Nuix", "Gesture: $it")
-                    val gestureText = "手势: ${LanguageUtils.gestureChinese(it)}"
                     when (it) {
-                        "pinch" -> {
+                        "index_flick" -> {
                             playGift()
                         }
                         "snap" -> {

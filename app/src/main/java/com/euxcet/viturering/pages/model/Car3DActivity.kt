@@ -145,9 +145,6 @@ class Car3DActivity : AppCompatActivity() {
                                 }
                             }
                         }
-                        "middle_pinch" -> {
-                            //overlayView?.switch()
-                        }
                         "snap" -> {
                             finish()
                         }
@@ -157,8 +154,14 @@ class Car3DActivity : AppCompatActivity() {
                         "circle_counterclockwise" -> {
                             playVideo(R.raw.car_window)
                         }
-                        "touch_ring" -> {
-                            //overlayView?.reset()
+                        "wave_up" -> {
+                            playVideo(R.raw.car_1)
+                        }
+                        "wave_down" -> {
+                            playVideo(R.raw.car_2)
+                        }
+                        "push_forward" -> {
+                            playVideo(R.raw.car_3)
                         }
                     }
                 }
