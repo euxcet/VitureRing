@@ -137,21 +137,21 @@ class Car3DActivity : AppCompatActivity() {
                                 return@runOnUiThread
                             }
                             // 操作模型
-                            scene?.objects?.let { objects ->
-                                if (objects.size > 0) {
-                                    val camera = scene?.camera
-                                    val model = objects[0]
-                                    val delayTime = 1000f / 60
-                                    val speed = Math.PI.toFloat() / 0.2f
-                                    rotateJob = CoroutineScope(Dispatchers.Main).launch {
-                                        while(true) {
-                                            val q = Quaternion.getQuaternion(floatArrayOf(0f, 1f, 0f, 1f), speed / 60)
-                                            model.setOrientation(Quaternion.multiply(model.orientation, q.normalize()))
-                                            delay(delayTime.toLong())
-                                        }
-                                    }
-                                }
-                            }
+//                            scene?.objects?.let { objects ->
+//                                if (objects.size > 0) {
+//                                    val camera = scene?.camera
+//                                    val model = objects[0]
+//                                    val delayTime = 1000f / 60
+//                                    val speed = Math.PI.toFloat() / 0.2f
+//                                    rotateJob = CoroutineScope(Dispatchers.Main).launch {
+//                                        while(true) {
+//                                            val q = Quaternion.getQuaternion(floatArrayOf(0f, 1f, 0f, 1f), speed / 60)
+//                                            model.setOrientation(Quaternion.multiply(model.orientation, q.normalize()))
+//                                            delay(delayTime.toLong())
+//                                        }
+//                                    }
+//                                }
+//                            }
                         }
                         "pinch_down" -> {
                             isPinchDown = true
