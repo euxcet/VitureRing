@@ -11,6 +11,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.widget.ViewPager2
 import com.euxcet.viturering.R
 import com.euxcet.viturering.RingManager
+import com.euxcet.viturering.utils.GestureThrottle
 import com.euxcet.viturering.utils.LanguageUtils
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -97,6 +98,9 @@ class HomeActivity : AppCompatActivity() {
                 runOnUiThread {
                     Log.e("Nuix", "Gesture: $it")
                     val gestureText = "手势: ${LanguageUtils.gestureChinese(it)}"
+                    if (GestureThrottle.throttle(it)) {
+                        return@runOnUiThread
+                    }
                     when (it) {
                         "pinch" -> {
                             val cursorPoint = controlView?.getCursorPoint()

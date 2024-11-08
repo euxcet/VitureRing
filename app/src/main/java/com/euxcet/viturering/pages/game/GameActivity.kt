@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.euxcet.viturering.R
 import com.euxcet.viturering.RingManager
 import com.euxcet.viturering.databinding.ActivityGameBinding
+import com.euxcet.viturering.utils.GestureThrottle
 import com.euxcet.viturering.utils.LanguageUtils
 import com.ss.ugc.android.alpha_player.IMonitor
 import com.ss.ugc.android.alpha_player.IPlayerAction
@@ -163,6 +164,9 @@ class GameActivity : AppCompatActivity() {
             onGestureCallback { // Gesture
                 runOnUiThread {
                     Log.e("Nuix", "Gesture: $it")
+                    if (GestureThrottle.throttle(it)) {
+                        return@runOnUiThread
+                    }
                     when (it) {
                         "index_flick" -> {
                             playGift()

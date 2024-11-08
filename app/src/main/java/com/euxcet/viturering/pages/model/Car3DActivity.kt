@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.euxcet.viturering.R
 import com.euxcet.viturering.RingManager
 import com.euxcet.viturering.databinding.ActivityCar3DactivityBinding
+import com.euxcet.viturering.utils.GestureThrottle
 import com.euxcet.viturering.utils.LanguageUtils
 import com.hcifuture.producer.detector.TouchState
 import com.hcifuture.producer.sensor.data.RingTouchEvent
@@ -128,6 +129,9 @@ class Car3DActivity : AppCompatActivity() {
                 runOnUiThread {
                     Log.e("Nuix", "Gesture: $it")
                     val gestureText = "手势: ${LanguageUtils.gestureChinese(it)}"
+                    if (GestureThrottle.throttle(it)) {
+                        return@runOnUiThread
+                    }
                     when (it) {
                         "pinch" -> {
                             // modelEngine.rotate(1.57f)
