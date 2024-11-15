@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".pages.game.GameActivity"
-    android:background="@drawable/home_background">
+    android:background="@drawable/shape_home_back">
     <FrameLayout
         android:id="@+id/cursor"
         android:layout_width="60dp"
@@ -24,7 +24,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:background="#000000"
         app:title="游戏"/>
     <Button
         android:id="@+id/test_btn"

@@ -20,6 +20,7 @@ import org.the3deer.util.math.Quaternion;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EventObject;
 import java.util.HashMap;
 import java.util.List;
@@ -850,12 +851,12 @@ public class Scene implements EventListener, RenderListener {
             if (maxCenterY > maxLocation) maxLocation = maxCenterY;
             if (maxCenterZ > maxLocation) maxLocation = maxCenterZ;
         }
-        //Log.v("SceneLoader", "Max location: " + maxLocation);
+        Log.v("SceneLoader", "Max location: " + maxLocation);
 
         // calculate the scale factor
         float scaleFactor = newScale / (maxLength + maxLocation);
         final float[] finalScale = new float[]{scaleFactor, scaleFactor, scaleFactor};
-        //Log.v("SceneLoader", "New scale: " + scaleFactor);
+        Log.v("SceneLoader", "New scale: " + scaleFactor);
 
         if (scaleFactor > 0.5f && scaleFactor < 1.5f) {
             return;
@@ -891,14 +892,14 @@ public class Scene implements EventListener, RenderListener {
             float localScaleY = scaleFactor * original.getScale()[1];
             float localScaleZ = scaleFactor * original.getScale()[2];
             data.setScale(new float[]{localScaleX, localScaleY, localScaleZ});
-            //Log.v("SceneLoader", "Mew model scale: " + Arrays.toString(data.getScale()));
+            Log.v("SceneLoader", "Mew model scale: " + Arrays.toString(data.getScale()));
 
             // relocate
             float localTranlactionX = original.getLocation()[0] * scaleFactor + globalDifference[0];
             float localTranlactionY = original.getLocation()[1] * scaleFactor + globalDifference[1];
             float localTranlactionZ = original.getLocation()[2] * scaleFactor + globalDifference[2];
             data.setLocation(new float[]{localTranlactionX, localTranlactionY, localTranlactionZ});
-            //Log.v("SceneLoader", "Mew model location: " + Arrays.toString(data.getLocation()));
+            Log.v("SceneLoader", "Mew model location: " + Arrays.toString(data.getLocation()));
 
             // center
             //data.translate(globalDifference);

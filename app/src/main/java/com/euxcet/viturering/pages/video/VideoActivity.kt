@@ -9,7 +9,6 @@ import android.view.WindowManager
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.euxcet.viturering.R
 import com.euxcet.viturering.RingManager
 import com.euxcet.viturering.databinding.ActivityVideoBinding
 import com.euxcet.viturering.utils.LanguageUtils
@@ -18,6 +17,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.io.File
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -67,13 +67,17 @@ class VideoActivity : AppCompatActivity() {
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
         window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN)
         setContentView(binding.root)
-        val path = "android.resource://" + packageName + "/" + R.raw.demo
-        binding.videoView.setVideoURI(Uri.parse(path))
-        binding.videoView.setOnPreparedListener {
-            mediaPlayer = it
-            binding.videoControl.setVideoController(videoController)
-            binding.videoControl.setDuration(it.duration)
-            binding.videoControl.play()
+        val demoDir = getExternalFilesDir("res")
+        if (demoDir != null && demoDir.exists()) {
+            val file = File(demoDir, "demo.mp4")
+//            val path = "android.resource://" + packageName + "/" + R.raw.demo
+            binding.videoView.setVideoURI(Uri.fromFile(file))
+            binding.videoView.setOnPreparedListener {
+                mediaPlayer = it
+                binding.videoControl.setVideoController(videoController)
+                binding.videoControl.setDuration(it.duration)
+                binding.videoControl.play()
+            }
         }
     }
 

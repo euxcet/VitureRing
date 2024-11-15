@@ -3,7 +3,6 @@ package com.euxcet.viturering.pages.model
 import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
 import android.net.Uri
-import android.opengl.Matrix
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -20,23 +19,17 @@ import com.euxcet.viturering.utils.LanguageUtils
 import com.hcifuture.producer.detector.TouchState
 import com.hcifuture.producer.sensor.data.RingTouchEvent
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import org.the3deer.android_3d_model_engine.ModelEngine
 import org.the3deer.android_3d_model_engine.camera.CameraController
 import org.the3deer.android_3d_model_engine.drawer.BoundingBoxRenderer
 import org.the3deer.android_3d_model_engine.model.Camera
 import org.the3deer.android_3d_model_engine.model.Constants
+import org.the3deer.android_3d_model_engine.model.Light
 import org.the3deer.android_3d_model_engine.model.Scene
-import org.the3deer.android_3d_model_engine.services.SceneLoader
 import org.the3deer.android_3d_model_engine.view.GLFragment
 import org.the3deer.android_3d_model_engine.view.GLSurfaceView
 import org.the3deer.util.android.ContentUtils
-import org.the3deer.util.math.Math3DUtils
-import org.the3deer.util.math.Quaternion
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -67,15 +60,28 @@ class Car3DActivity : AppCompatActivity() {
 
     private fun loadModel() {
         val args = Bundle()
-        ContentUtils.provideAssets(this) // 不调用找不到模型所需文件
-        args.putString("uri", "android://${packageName}/assets/models/Paimon.obj")
+        var hasExternalModel = false
+        val modelDir = getExternalFilesDir("models")
+        if (modelDir != null && modelDir.exists()) {
+            val modelFile = modelDir.listFiles()?.firstOrNull { it.isFile && (it.extension == "obj" || it.extension == "glb" || it.extension == "gltf" || it.extension == "stl") }
+            if (modelFile != null) {
+                hasExternalModel = true
+                ContentUtils.setCurrentDir(modelDir) // 不调用找不到模型所需文件
+                args.putString("uri", Uri.fromFile(modelFile).toString())
+            }
+        }
+        if (!hasExternalModel) {
+            ContentUtils.provideAssets(this) // 不调用找不到模型所需文件
+            args.putString("uri", "android://${packageName}/assets/models/Paimon.obj")
+        }
         // args.putString("type", "0") //obj不用设置？
         args.putBoolean("demo", false)
         modelEngine.beanFactory.addOrReplace("extras", args)
         modelEngine.beanFactory.addOrReplace("surface", GLSurfaceView(this))
         modelEngine.beanFactory.addOrReplace("fragment_gl", GLFragment())
-        modelEngine.beanFactory.addOrReplace("scene_0.loader", SceneLoader())
-        modelEngine.beanFactory.addOrReplace("20.scene_0.camera", Camera(Constants.UNIT))
+        modelEngine.beanFactory.addOrReplace("scene_0.loader", MySceneLoader(modelEngine))
+        modelEngine.beanFactory.addOrReplace("20.scene_0.camera", Camera(1f))
+//        modelEngine.beanFactory.addOrReplace("20.scene_0.light", Light(floatArrayOf(0f, Constants.UNIT * 10f, Constants.UNIT * 10f)))
         // modelEngine.beanFactory.addOrReplace("80.gui.renderer", GUISystem().apply { isEnabled = false })
         modelEngine.beanFactory.addOrReplace("50.renderer4.boundingBoxDrawer", BoundingBoxRenderer().apply { isEnabled = false })
         modelEngine.refresh()
@@ -94,6 +100,23 @@ class Car3DActivity : AppCompatActivity() {
     private var isPlaying = false
     private fun playVideo(resId: Int) {
         val path = "android.resource://" + packageName + "/" + resId
+        playVideo(Uri.parse(path))
+    }
+
+    private fun playVideo(name: String) {
+        val resDir = getExternalFilesDir("res")
+        if (resDir?.exists() == false) {
+            resDir.mkdirs()
+        }
+        val targetFile = resDir?.listFiles()?.firstOrNull {
+            it.nameWithoutExtension == name
+        }
+        if (targetFile != null) {
+            playVideo(Uri.fromFile(targetFile))
+        }
+    }
+
+    private fun playVideo(uri: Uri) {
         binding.videoContainer.visibility = View.VISIBLE
         binding.videoView.visibility = View.VISIBLE
         binding.videoView.setOnPreparedListener { mp ->
@@ -111,7 +134,7 @@ class Car3DActivity : AppCompatActivity() {
             isPlaying = false
             true
         }
-        binding.videoView.setVideoURI(Uri.parse(path))
+        binding.videoView.setVideoURI(uri)
     }
 
     private var rotateJob: Job? = null
@@ -168,19 +191,19 @@ class Car3DActivity : AppCompatActivity() {
                             finish()
                         }
                         "circle_clockwise" -> {
-                            playVideo(R.raw.car_racing)
+                            playVideo("car_window_open")
                         }
                         "circle_counterclockwise" -> {
-                            playVideo(R.raw.car_window)
+                            playVideo("car_window_close")
                         }
                         "wave_up" -> {
-                            playVideo(R.raw.car_1)
+                            playVideo("car_screen_up")
                         }
                         "wave_down" -> {
-                            playVideo(R.raw.car_2)
+                            playVideo("car_screen_down")
                         }
                         "push_forward" -> {
-                            playVideo(R.raw.car_3)
+                            playVideo("car_view_back")
                         }
                     }
                 }

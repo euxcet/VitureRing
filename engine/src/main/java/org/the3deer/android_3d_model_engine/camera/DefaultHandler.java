@@ -40,6 +40,11 @@ public class DefaultHandler implements CameraController.Handler {
         System.arraycopy(camera.getUp(), 0, this.saveUp, 0, camera.getUp().length);
     }
 
+    /**
+     * 旋转相机
+     * @param dX y轴旋转角度
+     * @param dY x轴旋转角度
+     */
     @Override
     public void move(float dX, float dY) {
         translateCameraImpl(dX, dY);
@@ -129,7 +134,7 @@ public class DefaultHandler implements CameraController.Handler {
             yArriba *= dX;
             zArriba *= dX;
 
-            float[] rightd = Math3DUtils.multiply(right, dY);
+            float[] rightd = Math3DUtils.multiply(right, dY); // 旋转轴垂直于滑动方向
             float[] upd = Math3DUtils.multiply(camera.getUp(), dX);
             float[] rot = Math3DUtils.add(rightd,upd);
             float length = Math3DUtils.length(rot);

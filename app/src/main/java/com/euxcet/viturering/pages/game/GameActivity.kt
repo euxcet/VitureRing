@@ -2,7 +2,6 @@ package com.euxcet.viturering.pages.game
 
 import android.content.pm.ActivityInfo
 import android.os.Bundle
-import android.os.Environment
 import android.util.Log
 import android.view.View
 import android.view.WindowManager
@@ -12,7 +11,6 @@ import com.euxcet.viturering.R
 import com.euxcet.viturering.RingManager
 import com.euxcet.viturering.databinding.ActivityGameBinding
 import com.euxcet.viturering.utils.GestureThrottle
-import com.euxcet.viturering.utils.LanguageUtils
 import com.ss.ugc.android.alpha_player.IMonitor
 import com.ss.ugc.android.alpha_player.IPlayerAction
 import com.ss.ugc.android.alpha_player.model.ScaleType
@@ -143,6 +141,7 @@ class GameActivity : AppCompatActivity() {
             }
         }
         binding?.gifView?.startVideoGift(config, file?.parent ?: "")
+
     }
 
     private fun getResourceFile(): File? {

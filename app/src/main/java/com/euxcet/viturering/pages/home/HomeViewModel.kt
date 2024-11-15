@@ -26,10 +26,8 @@ class HomeViewModel(application: Application): AndroidViewModel(application) {
         // game
         val gameCardInfo = CardInfo(
             key = "game",
-            title = "游戏",
             description = "Play the game",
-            icon = R.drawable.ic_launcher_foreground,
-            backgroundColor = Color.parseColor("#FF5722"),
+            backgroundRes = R.drawable.ic_game,
             hCells = 2,
             vCells = 2,
             hPosition = 0,
@@ -38,10 +36,8 @@ class HomeViewModel(application: Application): AndroidViewModel(application) {
         // video
         val videoCardInfo = CardInfo(
             key = "video",
-            title = "影音",
             description = "Watch the video",
-            icon = R.drawable.ic_play,
-            backgroundColor = Color.parseColor("#FFC107"),
+            backgroundRes = R.drawable.ic_movie,
             hCells = 4,
             vCells = 4,
             hPosition = 2,
@@ -50,10 +46,8 @@ class HomeViewModel(application: Application): AndroidViewModel(application) {
         // 3d model
         val modelCardInfo = CardInfo(
             key = "models",
-            title = "3D",
             description = "View the 3D model",
-            icon = R.drawable.ic_coordinate_system,
-            backgroundColor = Color.parseColor("#FFC107"),
+            backgroundRes = R.drawable.ic_models,
             hCells = 2,
             vCells = 2,
             hPosition = 0,
@@ -63,10 +57,8 @@ class HomeViewModel(application: Application): AndroidViewModel(application) {
         // fake pages
         val fake1CardInfo = CardInfo(
             key = "fake1",
-            title = "地图",
-            description = "Fake1",
-            icon = R.drawable.ic_launcher_foreground,
-            backgroundColor = Color.parseColor("#FF5722"),
+            description = "地图",
+            backgroundRes = R.drawable.ic_map,
             hCells = 2,
             vCells = 2,
             hPosition = 0,
@@ -75,10 +67,8 @@ class HomeViewModel(application: Application): AndroidViewModel(application) {
 
         val fake2CardInfo = CardInfo(
             key = "fake2",
-            title = "会议",
-            description = "Fake2",
-            icon = R.drawable.ic_launcher_foreground,
-            backgroundColor = Color.parseColor("#FF5722"),
+            description = "会议",
+            backgroundRes = R.drawable.ic_meeting,
             hCells = 4,
             vCells = 4,
             hPosition = 2,
@@ -87,10 +77,8 @@ class HomeViewModel(application: Application): AndroidViewModel(application) {
 
         val fake3CardInfo = CardInfo(
             key = "fake3",
-            title = "购物",
-            description = "Fake3",
-            icon = R.drawable.ic_launcher_foreground,
-            backgroundColor = Color.parseColor("#FF5722"),
+            description = "音乐",
+            backgroundRes = R.drawable.ic_music,
             hCells = 2,
             vCells = 2,
             hPosition = 0,

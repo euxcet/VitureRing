@@ -3,10 +3,12 @@ package com.euxcet.viturering.pages.home
 import android.content.Context
 import android.os.Bundle
 import android.util.Size
+import android.view.Gravity
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.euxcet.viturering.R
@@ -85,19 +87,31 @@ class CardPageFragment : Fragment() {
             val cellWidth = (pageWidth - paddingH * 2 - space * (hCells - 1)) / hCells
             val cellHeight = (pageHeight - paddingV * 2 - space * (vCells - 1)) / vCells
             binding.root.removeAllViews()
+            val wrapper = LinearLayout(requireContext())
+            wrapper.orientation = LinearLayout.HORIZONTAL
+            wrapper.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+            wrapper.gravity = Gravity.CENTER
+            wrapper.clipChildren = false
+            binding.root.clipChildren = false
+            binding.root.addView(wrapper)
             cardInfoList.forEach { cardInfo ->
                 val cardBinding = ItemHomeCardBinding.inflate(layoutInflater, binding.root, false)
-                val cardWidth = cellWidth * cardInfo.hCells + space * (cardInfo.hCells - 1)
-                val cardHeight = cellHeight * cardInfo.vCells + space * (cardInfo.vCells - 1)
+//                val cardWidth = cellWidth * cardInfo.hCells + space * (cardInfo.hCells - 1)
+//                val cardHeight = cellHeight * cardInfo.vCells + space * (cardInfo.vCells - 1)
+                val cardWidth = (pageHeight * 0.49).toInt()
+                val cardHeight = (pageHeight * 0.7).toInt()
+//                cardBinding.root.layoutParams = ViewGroup.MarginLayoutParams(cardWidth, cardHeight).apply {
+//                    val left = cardInfo.hPosition * (cellWidth + space) + paddingH
+//                    val top = cardInfo.vPosition * (cellHeight + space) + paddingV
+//                    setMargins(left, top, 0, 0)
+//                }
                 cardBinding.root.layoutParams = ViewGroup.MarginLayoutParams(cardWidth, cardHeight).apply {
-                    val left = cardInfo.hPosition * (cellWidth + space) + paddingH
-                    val top = cardInfo.vPosition * (cellHeight + space) + paddingV
-                    setMargins(left, top, 0, 0)
+                    setMargins(space, 0, space, 0)
                 }
                 if (cardInfo.backgroundRes > 0) {
-                    cardBinding.root.setBackgroundResource(cardInfo.backgroundRes)
+                    cardBinding.background.setImageResource(cardInfo.backgroundRes)
                 } else if (cardInfo.backgroundColor != 0) {
-                    cardBinding.root.background.setTint(cardInfo.backgroundColor)
+                    cardBinding.background.setImageResource(cardInfo.backgroundColor)
                 }
                 if (cardInfo.icon > 0) {
                     cardBinding.image.setImageResource(cardInfo.icon)
@@ -105,7 +119,10 @@ class CardPageFragment : Fragment() {
                 cardInfo.title?.let {
                     cardBinding.title.text = it
                 }
-                binding.root.addView(cardBinding.root)
+                // binding.root.addView(cardBinding.root)
+                cardBinding.root.alpha = ICON_DEFAULT_ALPHA
+                cardBinding.root.elevation = space.toFloat()
+                wrapper.addView(cardBinding.root)
                 cardBinding.root.setOnClickListener {
                     openCard(cardInfo.key)
                 }
@@ -162,10 +179,13 @@ class CardPageFragment : Fragment() {
             val right = left + view.width
             val bottom = top + view.height
             var visibility = View.INVISIBLE
+            var opacity = ICON_DEFAULT_ALPHA
             if (x in left until right && y in top until bottom) {
-                visibility = View.VISIBLE
+                // visibility = View.VISIBLE
+                opacity = ICON_SELECTED_ALPHA
             }
-            view.findViewById<View>(R.id.mask).visibility = visibility
+            // view.findViewById<View>(R.id.mask).visibility = visibility
+            view.alpha = opacity
         }
     }
 
@@ -173,6 +193,9 @@ class CardPageFragment : Fragment() {
         private const val ARG_PAGE_NO = "PAGE_NO"
         private const val ARG_PAGE_WIDTH = "PAGE_WIDTH"
         private const val ARG_PAGE_HEIGHT = "PAGE_HEIGHT"
+
+        private const val ICON_DEFAULT_ALPHA = 0.7f
+        private const val ICON_SELECTED_ALPHA = 1f
 
         @JvmStatic
         fun newInstance(pageNo: Int, pageWidth: Int?, pageHeight: Int?) =
