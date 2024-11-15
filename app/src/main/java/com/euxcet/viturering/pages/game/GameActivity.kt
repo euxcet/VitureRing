@@ -129,33 +129,27 @@ class GameActivity : AppCompatActivity() {
                 gifView.translationY = y - gifView.height / 2
             }
         }
-        val file = getResourceFile()
+        val file = getResourceFile() ?: return
         val config = ConfigModel().apply {
             landscapeItem = ConfigModel.Item().apply {
-                path = file?.name
+                path = file.name
                 alignMode = ScaleType.ScaleToFill.ordinal
             }
             portraitItem = ConfigModel.Item().apply {
-                path = file?.name
+                path = file.name
                 alignMode = ScaleType.ScaleToFill.ordinal
             }
         }
-        binding?.gifView?.startVideoGift(config, file?.parent ?: "")
+        binding?.gifView?.startVideoGift(config, file.parent ?: "")
 
     }
 
     private fun getResourceFile(): File? {
-        val dirFile: File = getExternalFilesDir("alphaVideoGift") ?: return null
+        val dirFile: File = getExternalFilesDir("res") ?: return null
         if (!dirFile.exists()) {
             dirFile.mkdirs()
         }
-        val targetFile = File(dirFile, "game_wave_video.mp4")
-        if (!targetFile.exists()) {
-            // copy raw resource to dirPath
-            val rawResource = resources.openRawResource(R.raw.game_wave_video)
-            targetFile.outputStream().use { rawResource.copyTo(it) }
-        }
-        return targetFile
+        return dirFile.listFiles()?.firstOrNull { it.nameWithoutExtension == "game_wave_video" }
     }
 
     private fun connectRing() {
