@@ -80,13 +80,13 @@ public class SceneRenderer implements Renderer, EventListener {
                         true, light.isEnabled(), false, true, true, objects, i);
             }
         }
-//        for (int i = 0; i < objects.size(); i++) {
-//            final Object3DData object3DData = objects.get(i);
-//            if (object3DData.getMaterial().getAlphaMode() != Material.AlphaMode.OPAQUE) {
-//                drawObject(light.getLocation(), null, scene.getCamera().getPos(),
-//                        true, light.isEnabled(), false, true, true, objects, i);
-//            }
-//        }
+        for (int i = 0; i < objects.size(); i++) {
+            final Object3DData object3DData = objects.get(i);
+            if (object3DData.getMaterial().getAlphaMode() != Material.AlphaMode.OPAQUE) {
+                drawObject(light.getLocation(), null, scene.getCamera().getPos(),
+                        true, light.isEnabled(), false, true, true, objects, i);
+            }
+        }
     }
 
     private void drawObject(float[] lightPosInWorldSpace, float[] colorMask, float[] cameraPosInWorldSpace, boolean doAnimation, boolean drawLighting, boolean drawWireframe, boolean drawTextures, boolean drawColors, List<Object3DData> objects, int i) {

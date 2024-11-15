@@ -27,6 +27,7 @@ import org.the3deer.android_3d_model_engine.model.Camera
 import org.the3deer.android_3d_model_engine.model.Constants
 import org.the3deer.android_3d_model_engine.model.Light
 import org.the3deer.android_3d_model_engine.model.Scene
+import org.the3deer.android_3d_model_engine.services.SceneLoader
 import org.the3deer.android_3d_model_engine.view.GLFragment
 import org.the3deer.android_3d_model_engine.view.GLSurfaceView
 import org.the3deer.util.android.ContentUtils
@@ -79,8 +80,13 @@ class Car3DActivity : AppCompatActivity() {
         modelEngine.beanFactory.addOrReplace("extras", args)
         modelEngine.beanFactory.addOrReplace("surface", GLSurfaceView(this))
         modelEngine.beanFactory.addOrReplace("fragment_gl", GLFragment())
-        modelEngine.beanFactory.addOrReplace("scene_0.loader", MySceneLoader(modelEngine))
-        modelEngine.beanFactory.addOrReplace("20.scene_0.camera", Camera(1f))
+        if (hasExternalModel) {
+            modelEngine.beanFactory.addOrReplace("scene_0.loader", MySceneLoader(modelEngine))
+            modelEngine.beanFactory.addOrReplace("20.scene_0.camera", Camera(1f))
+        } else {
+            modelEngine.beanFactory.addOrReplace("scene_0.loader", SceneLoader())
+            modelEngine.beanFactory.addOrReplace("20.scene_0.camera", Camera(Constants.UNIT))
+        }
 //        modelEngine.beanFactory.addOrReplace("20.scene_0.light", Light(floatArrayOf(0f, Constants.UNIT * 10f, Constants.UNIT * 10f)))
         // modelEngine.beanFactory.addOrReplace("80.gui.renderer", GUISystem().apply { isEnabled = false })
         modelEngine.beanFactory.addOrReplace("50.renderer4.boundingBoxDrawer", BoundingBoxRenderer().apply { isEnabled = false })
