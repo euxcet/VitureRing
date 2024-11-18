@@ -89,7 +89,7 @@ class GameActivity : AppCompatActivity() {
 
         override fun startAction() {
             Log.i(TAG, "call startAction()")
-            binding?.cursor?.visibility = View.INVISIBLE
+            binding?.cursor?.visibility = View.GONE
             isPlaying = true
         }
 

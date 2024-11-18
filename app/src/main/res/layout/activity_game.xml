@@ -5,11 +5,26 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".pages.game.GameActivity">
+    tools:context=".pages.game.GameActivity"
+    android:background="@drawable/shape_home_back">
     <VideoView
         android:id="@+id/background"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
+    <com.euxcet.viturering.pages.game.VideoGiftView
+        android:id="@+id/gif_view"
+        android:layout_width="384dp"
+        android:layout_height="216dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+    <FrameLayout
+        android:id="@+id/cursor_2"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:background="@drawable/shape_cursor"
+        android:backgroundTint="#00000000"/>
     <FrameLayout
         android:id="@+id/cursor"
         android:layout_width="60dp"
@@ -17,18 +32,12 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:background="@drawable/shape_cursor"/>
-    <com.euxcet.viturering.pages.game.VideoGiftView
-        android:id="@+id/gif_view"
-        android:layout_width="384dp"
-        android:layout_height="216dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
     <com.euxcet.viturering.TopBarView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:background="#000000"
+        android:background="#00000000"
         app:title="游戏"/>
     <Button
         android:id="@+id/test_btn"
