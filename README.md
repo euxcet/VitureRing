@@ -15,3 +15,4 @@
 - car_window_open.mp4
 - demo.mp4
 - game_wave_video.mp4
+- game_background.mp4

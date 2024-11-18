@@ -56,6 +56,7 @@ class GameActivity : AppCompatActivity() {
                 }
             }
         }
+        playBackground()
     }
 
     override fun onStart() {
@@ -142,6 +143,23 @@ class GameActivity : AppCompatActivity() {
         }
         binding?.gifView?.startVideoGift(config, file.parent ?: "")
 
+    }
+
+    private fun playBackground() {
+        val videoView = binding?.background
+        videoView?.setVideoPath(getBackgroundResourceFile()?.absolutePath ?: return)
+        videoView?.setOnPreparedListener {
+            it.isLooping = true
+            it.start()
+        }
+    }
+
+    private fun getBackgroundResourceFile(): File? {
+        val dirFile: File = getExternalFilesDir("res") ?: return null
+        if (!dirFile.exists()) {
+            dirFile.mkdirs()
+        }
+        return dirFile.listFiles()?.firstOrNull { it.nameWithoutExtension == "game_background" }
     }
 
     private fun getResourceFile(): File? {
