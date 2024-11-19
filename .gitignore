@@ -19,3 +19,4 @@ app/**/res/raw/demo.mp4
 app/**/res/raw/game_wave_video.mp4
 app/**/res/raw/car*
 app/release/**
+app/src/main/assets/download

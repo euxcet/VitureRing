@@ -22,10 +22,27 @@ import com.euxcet.viturering.utils.Permission
 import com.hcifuture.producer.sensor.NuixSensor
 import com.hcifuture.producer.sensor.data.RingTouchEvent
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.io.File
+import java.nio.file.FileSystem
+import java.nio.file.FileSystems
+import java.nio.file.Path
 import javax.inject.Inject
+import kotlin.io.path.absolutePathString
+import kotlin.io.path.createDirectories
+import kotlin.io.path.exists
+import kotlin.io.path.isDirectory
+import kotlin.io.path.isRegularFile
+import kotlin.io.path.listDirectoryEntries
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    companion object {
+        const val TAG = "MainActivity"
+    }
 
     @Inject
     lateinit var ringManager: RingManager
@@ -54,6 +71,9 @@ class MainActivity : ComponentActivity() {
         findViewById<TextView>(R.id.calibrate).setOnClickListener {
             ringManager.calibrate()
             Toast.makeText(this, "校准成功", Toast.LENGTH_SHORT).show()
+        }
+        CoroutineScope(Dispatchers.Default).launch {
+            checkResFiles()
         }
     }
 
@@ -163,6 +183,68 @@ class MainActivity : ComponentActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+    }
+
+    private fun checkResFiles() {
+        val resFiles = listOf(
+            "models",
+            "res/car_chunk_close.mp4",
+            "res/car_chunk_open.mp4",
+            "res/car_screen_down.mp4",
+            "res/car_screen_up.mp4",
+            "res/car_view_back.mp4",
+            "res/car_window_close.mp4",
+            "res/car_window_open.mp4",
+            "res/demo.mp4",
+            "res/game_wave_video.mp4",
+            "res/game_background.mp4"
+        )
+        val externalRootPath = getExternalFilesDir(null)?.absolutePath ?: return
+        resFiles.forEach { relativePath ->
+            val path =  FileSystems.getDefault().getPath(externalRootPath, relativePath)
+            if (relativePath.indexOfLast { it == '.' } == -1) {
+                // is directory
+                if (!path.exists()) {
+                    path.createDirectories()
+                }
+                val file = path.listDirectoryEntries().firstOrNull { it.isRegularFile() }
+                if (file == null) {
+                    try {
+                        // need copy asset to external storage
+                        val assetDirPath = "download/$relativePath"
+                        assets.list(assetDirPath)?.forEach {
+                            copyAssetFileToExternalStorage("$assetDirPath/$it", path.toFile())
+                        }
+                    } catch (e: Exception) {
+                        Log.e(TAG, "copy asset file failed", e)
+                    }
+                }
+            } else {
+                // is file
+                if (!path.exists()) {
+                    val assetDirPath = "download/$relativePath"
+                    copyAssetFileToExternalStorage(assetDirPath, path.toFile().parentFile!!)
+                }
+            }
+        }
+    }
+
+    private fun copyAssetFileToExternalStorage(assetFilePath: String, externalDir: File) {
+        try {
+            val file = File(externalDir, assetFilePath.substringAfterLast('/'))
+            if (!file.exists()) {
+                file.parentFile?.mkdirs()
+                assets.open(assetFilePath).use { input ->
+                    file.outputStream().use { output ->
+                        input.copyTo(output)
+                        output.flush()
+                    }
+                }
+                Log.d(TAG, "Copied asset file to external storage: ${file.absolutePath}")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to copy asset file to external storage", e)
+        }
     }
 
 }
