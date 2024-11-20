@@ -116,6 +116,22 @@ class RingManager @Inject constructor(
         nuixSensorManager.defaultRing.disconnect()
     }
 
+    fun openIMU() {
+        CoroutineScope(Dispatchers.Default).launch {
+            if (nuixSensorManager.defaultRing.target is RingV2) {
+                (nuixSensorManager.defaultRing.target as RingV2).openIMU()
+            }
+        }
+    }
+
+    fun closeIMU() {
+        CoroutineScope(Dispatchers.Default).launch {
+            if (nuixSensorManager.defaultRing.target is RingV2) {
+                (nuixSensorManager.defaultRing.target as RingV2).closeIMU()
+            }
+        }
+    }
+
     fun connect() {
         if (connected) {
             if (::listener.isInitialized) {
