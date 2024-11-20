@@ -102,7 +102,7 @@ class Car3DActivity : AppCompatActivity() {
     }
 
     private var isTouchDown = false
-
+    private var isStayVideo = false
     private var isPlaying = false
     private fun playVideo(resId: Int) {
         val path = "android.resource://" + packageName + "/" + resId
@@ -130,8 +130,9 @@ class Car3DActivity : AppCompatActivity() {
             isPlaying = true
         }
         binding.videoView.setOnCompletionListener {
-            binding.videoContainer.visibility = View.GONE
-            binding.videoView.visibility = View.GONE
+//            binding.videoContainer.visibility = View.GONE
+//            binding.videoView.visibility = View.GONE
+            isStayVideo = true
             isPlaying = false
         }
         binding.videoView.setOnErrorListener { mp, what, extra ->
@@ -194,7 +195,14 @@ class Car3DActivity : AppCompatActivity() {
                             isPinchDown = false
                         }
                         "snap" -> {
-                            finish()
+                            if (isStayVideo || isPlaying) {
+                                binding.videoContainer.visibility = View.GONE
+                                binding.videoView.visibility = View.GONE
+                                isStayVideo = false
+                                isPlaying = false
+                            } else {
+                                finish()
+                            }
                         }
                         "circle_clockwise" -> {
                             playVideo("car_window_open")
