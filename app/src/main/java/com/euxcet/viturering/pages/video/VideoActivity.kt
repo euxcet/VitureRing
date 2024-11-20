@@ -116,6 +116,9 @@ class VideoActivity : AppCompatActivity() {
                     Log.e("Nuix", "Touch: $touchText")
 //                    touchView.text = touchText
                     when (it.data) {
+                        RingTouchEvent.HOLD -> {
+                            finish()
+                        }
                         RingTouchEvent.TAP -> {
                             binding.videoControl.switchPlay()
                         }
