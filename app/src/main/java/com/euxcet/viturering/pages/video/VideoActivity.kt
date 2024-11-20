@@ -89,11 +89,13 @@ class VideoActivity : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
+        ringManager.openIMU()
         binding.videoControl.pause()
     }
 
     private var dismissToastJob: Job? = null
     private fun connectRing() {
+        ringManager.closeIMU()
         ringManager.registerListener {
             onGestureCallback { // Gesture
                 runOnUiThread {
@@ -118,7 +120,8 @@ class VideoActivity : AppCompatActivity() {
                             binding.videoControl.switchPlay()
                         }
                         RingTouchEvent.SWIPE_POSITIVE,
-                        RingTouchEvent.FLICK_POSITIVE -> {
+                        RingTouchEvent.FLICK_POSITIVE,
+                        RingTouchEvent.UP -> {
                             binding.videoControl.beginSeek()
                             binding.videoControl.seek(10000)
                             dismissToastJob?.cancel()
@@ -128,7 +131,8 @@ class VideoActivity : AppCompatActivity() {
                             }
                         }
                         RingTouchEvent.SWIPE_NEGATIVE,
-                        RingTouchEvent.FLICK_NEGATIVE -> {
+                        RingTouchEvent.FLICK_NEGATIVE,
+                        RingTouchEvent.DOWN, -> {
                             binding.videoControl.beginSeek()
                             binding.videoControl.seek(-10000)
                             dismissToastJob = lifecycleScope.launch {

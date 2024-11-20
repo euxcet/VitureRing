@@ -37,11 +37,10 @@ class LanguageUtils {
                 RingTouchEvent.TOP_BUTTON_LONG_PRESS -> "上键长按"
                 RingTouchEvent.TOP_BUTTON_RELEASE -> "上键释放"
                 RingTouchEvent.TAP -> "单击"
-                RingTouchEvent.SWIPE_POSITIVE -> "上滑"
-                RingTouchEvent.SWIPE_NEGATIVE -> "下滑"
-                RingTouchEvent.FLICK_POSITIVE -> "上滑"
-                RingTouchEvent.FLICK_NEGATIVE -> "下滑"
+                RingTouchEvent.SWIPE_POSITIVE, RingTouchEvent.FLICK_POSITIVE, RingTouchEvent.UP -> "上滑"
+                RingTouchEvent.SWIPE_NEGATIVE, RingTouchEvent.FLICK_NEGATIVE, RingTouchEvent.DOWN -> "下滑"
                 RingTouchEvent.HOLD -> "长按"
+                RingTouchEvent.DOUBLE_TAP -> "双击"
             }
         }
 
