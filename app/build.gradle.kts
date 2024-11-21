@@ -80,6 +80,7 @@ dependencies {
     implementation("androidx.activity:activity:1.9.3")
     kapt("com.google.dagger:hilt-android-compiler:2.49")
     kapt("androidx.hilt:hilt-compiler:1.2.0")
+    implementation("no.nordicsemi.android:ble-ktx:2.9.0")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
     implementation(files("libs/TrackerClientPlus.jar"))
     implementation(project(":producer"))
