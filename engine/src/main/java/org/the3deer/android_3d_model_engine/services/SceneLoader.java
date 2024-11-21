@@ -19,6 +19,8 @@ import org.the3deer.android_3d_model_engine.services.wavefront.WavefrontLoaderTa
 import org.the3deer.util.android.ContentUtils;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -30,6 +32,9 @@ import javax.inject.Named;
 public class SceneLoader implements LoadListener {
 
     private final static String TAG = SceneLoader.class.getSimpleName();
+
+    private static URI lastModelUri;
+    private static List<Object3DData> lastObjects = new ArrayList<>();
 
     // dependencies
     @Inject @Named("bundle")
@@ -115,6 +120,11 @@ public class SceneLoader implements LoadListener {
             // load model
             Log.i(TAG, "Loading model... " + this.modelUri);
 
+            if (lastModelUri != null && lastModelUri.equals(this.modelUri) && !lastObjects.isEmpty()) {
+                scene.getObjects().addAll(lastObjects);
+                scene.onLoadComplete();
+                return;
+            }
             if (isDemo) {
                 new DemoLoaderTask(activity, null, this).execute();
             } else if (modelUri.toString().toLowerCase().endsWith(".obj") || modelType == 0) {
@@ -142,6 +152,7 @@ public class SceneLoader implements LoadListener {
 
         // provide context to allow reading resources
         ContentUtils.setThreadActivity(activity);
+        lastObjects.clear();
     }
 
     @Override
@@ -160,10 +171,12 @@ public class SceneLoader implements LoadListener {
     @Override
     public void onLoad(Object3DData data) {
         scene.addObject(data);
+        lastObjects.add(data);
     }
 
     @Override
     public void onLoadComplete() {
+        lastModelUri = modelUri;
         scene.onLoadComplete();
     }
 
