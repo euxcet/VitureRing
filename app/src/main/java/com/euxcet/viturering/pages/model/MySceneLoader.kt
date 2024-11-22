@@ -17,7 +17,7 @@ class MySceneLoader(val engine: ModelEngine): SceneLoader() {
                     val yRotate = Quaternion.getQuaternion(floatArrayOf(0f, 1f, 0f, 1f), Math.PI.toFloat())
                     model.setOrientation(Quaternion.multiply(model.orientation, yRotate.normalize()))
 //                    model.setOrientation(Quaternion.multiply(Quaternion.multiply(model.orientation, xRotate.normalize()), zRotate.normalize()))
-                    model.setLocation(model.location[0], model.location[1] - 10, model.location[2])
+                    model.setLocation(model.location[0] + 14, model.location[1] - 2, model.location[2])
                 }
             }
         }

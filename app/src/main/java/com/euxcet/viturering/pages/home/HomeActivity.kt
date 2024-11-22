@@ -8,12 +8,16 @@ import android.view.WindowManager
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
 import com.euxcet.viturering.R
 import com.euxcet.viturering.RingManager
 import com.euxcet.viturering.utils.GestureThrottle
 import com.euxcet.viturering.utils.LanguageUtils
+import com.hcifuture.producer.sensor.data.RingTouchEvent
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -117,7 +121,7 @@ class HomeActivity : AppCompatActivity() {
                             previousPage()
                         }
                         "snap" -> {
-                            moveTaskToBack(true)
+//                            moveTaskToBack(true)
                         }
                     }
                 }
@@ -128,6 +132,27 @@ class HomeActivity : AppCompatActivity() {
                         control.move(it.first * (density.coerceAtLeast(2f)) / 2, it.second * (density.coerceAtLeast(2f)) / 2)
                         val cursorPoint = control.getCursorPoint()
                         performFragmentCursorMove(cursorPoint.x.toInt(), cursorPoint.y.toInt())
+                    }
+                }
+            }
+            onTouchCallback { // Touch
+                runOnUiThread {
+                    val touchText = "触摸: ${(it.data)}"
+                    Log.e("Nuix", "Touch: $touchText")
+//                    touchView.text = touchText
+                    when (it.data) {
+                        RingTouchEvent.SWIPE_POSITIVE,
+                        RingTouchEvent.FLICK_POSITIVE,
+                        RingTouchEvent.UP -> {
+                            previousPage()
+                        }
+                        RingTouchEvent.SWIPE_NEGATIVE,
+                        RingTouchEvent.FLICK_NEGATIVE,
+                        RingTouchEvent.DOWN, -> {
+                            nextPage()
+                        }
+                        else -> {}
+//                    }
                     }
                 }
             }
