@@ -44,6 +44,7 @@ class Car3DActivity : AppCompatActivity() {
     private lateinit var binding: ActivityCar3DactivityBinding
     private val mainHandler = Handler(Looper.getMainLooper())
     private lateinit var modelEngine: ModelEngine
+    private var testReceiver: TestReceiver = TestReceiver(this)
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -56,6 +57,20 @@ class Car3DActivity : AppCompatActivity() {
         modelEngine = ModelEngine.newInstance(this, savedInstanceState, null)
         modelEngine.init()
         loadModel()
+        testReceiver.register { action: String ->
+            runOnUiThread {
+                if (isStayVideo) {
+                    binding.videoContainer.visibility = View.GONE
+                    binding.videoView.visibility = View.GONE
+                    isStayVideo = false
+                    isPlaying = false
+                } else {
+                    playVideo("car_screen_up")
+                }
+            }
+        }
+        binding.topBar.setTitleVisibility(View.VISIBLE)
+        binding.topBar.setTitle("pinch_down: ${isPinchDown}")
     }
 
 
@@ -74,6 +89,7 @@ class Car3DActivity : AppCompatActivity() {
         if (!hasExternalModel) {
             ContentUtils.provideAssets(this) // 不调用找不到模型所需文件
             args.putString("uri", "android://${packageName}/assets/models/Paimon.obj")
+            // args.putString("uri", "android://${packageName}/assets/models/低模fbx.fbx")
         }
         // args.putString("type", "0") //obj不用设置？
         args.putBoolean("demo", false)
@@ -190,9 +206,11 @@ class Car3DActivity : AppCompatActivity() {
                         }
                         "pinch_down" -> {
                             isPinchDown = true
+                            binding.topBar.setTitle("pinch_down: ${isPinchDown}")
                         }
                         "pinch_up" -> {
                             isPinchDown = false
+                            binding.topBar.setTitle("pinch_down: ${isPinchDown}")
                         }
                         "snap" -> {
                             if (isStayVideo || isPlaying) {
@@ -212,9 +230,11 @@ class Car3DActivity : AppCompatActivity() {
                         }
                         "wave_up" -> {
                             playVideo("car_screen_up")
+                            // playVideo("car_screen_down")
                         }
                         "wave_down" -> {
                             playVideo("car_screen_down")
+                            // playVideo("car_screen_up")
                         }
                         "push_forward" -> {
                             playVideo("car_view_back")
@@ -271,5 +291,10 @@ class Car3DActivity : AppCompatActivity() {
             }
         }
         ringManager.connect()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        testReceiver.unRegister()
     }
 }

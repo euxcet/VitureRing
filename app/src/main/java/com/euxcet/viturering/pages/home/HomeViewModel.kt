@@ -9,6 +9,7 @@ import com.euxcet.viturering.R
 import com.euxcet.viturering.pages.game.GameActivity
 import com.euxcet.viturering.pages.model.Car3DActivity
 import com.euxcet.viturering.pages.video.VideoActivity
+import com.euxcet.viturering.pages.writing.HandWritingActivity
 
 class HomeViewModel(application: Application): AndroidViewModel(application) {
 
@@ -101,6 +102,10 @@ class HomeViewModel(application: Application): AndroidViewModel(application) {
             }
             "video" -> {
                 val intent = Intent(context, VideoActivity::class.java)
+                context.startActivity(intent)
+            }
+            "fake1" -> {
+                val intent = Intent(context, HandWritingActivity::class.java)
                 context.startActivity(intent)
             }
             else -> {

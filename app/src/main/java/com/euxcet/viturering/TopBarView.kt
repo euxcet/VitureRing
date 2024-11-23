@@ -95,4 +95,8 @@ class TopBarView(context: Context, attrs: AttributeSet?, defStyleAttr: Int): Fra
     fun setTitle(title: String) {
         binding.title.text = title
     }
+
+    fun setTitleVisibility(visibility: Int) {
+        binding.title.visibility = visibility
+    }
 }
