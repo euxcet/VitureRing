@@ -92,6 +92,8 @@ class RingManager @Inject constructor(
     private var output: PrintWriter? = null
     private var socketConnectCallback: ((Boolean) -> Unit)? = null
     private var socketDisconnectCallback: (() -> Unit)? = null
+    private var counter = 0
+    private var timestamp = 0L
 
     fun setSocketConnectCallback(callback: ((Boolean) -> Unit)) {
         socketConnectCallback = callback
@@ -292,6 +294,15 @@ class RingManager @Inject constructor(
                             if (ringIMUJob == null) {
                                 ringIMUJob = CoroutineScope(Dispatchers.Default).launch {
                                     ring.getFlow<RingImuData>(RingSpec.imuFlowName(ring))?.collect {
+                                        counter += 1
+                                        if (timestamp == 0L) {
+                                            timestamp = System.currentTimeMillis()
+                                        }
+                                        if (counter > 400) {
+                                            Log.e("Nuix", "FPS: ${counter * 1000.0f / (System.currentTimeMillis() - timestamp)}")
+                                            timestamp = 0
+                                            counter = 0
+                                        }
                                         sendMessage("imu:${it.data.joinToString(",")}")
                                     }
                                 }
