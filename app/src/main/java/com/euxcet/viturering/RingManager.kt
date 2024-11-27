@@ -9,13 +9,16 @@ import com.hcifuture.producer.detector.WordDetector
 import com.hcifuture.producer.sensor.NuixSensor
 import com.hcifuture.producer.sensor.NuixSensorManager
 import com.hcifuture.producer.sensor.NuixSensorState
+import com.hcifuture.producer.sensor.data.RingImuData
 import com.hcifuture.producer.sensor.data.RingTouchData
 import com.hcifuture.producer.sensor.data.RingTouchEvent
+import com.hcifuture.producer.sensor.data.RingV2TouchRawData
 import com.hcifuture.producer.sensor.external.ring.RingSpec
 import com.hcifuture.producer.sensor.external.ring.ringV1.RingV1
 import com.hcifuture.producer.sensor.external.ring.ringV2.RingV2
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.BufferedReader
@@ -249,6 +252,9 @@ class RingManager @Inject constructor(
         stopSocketClient()
     }
 
+    var ringIMUJob: Job? = null
+    var ringTouchRaw: Job? = null
+
     fun connect() {
         if (connected) {
             if (::listener.isInitialized) {
@@ -261,6 +267,10 @@ class RingManager @Inject constructor(
         CoroutineScope(Dispatchers.Default).launch {
             while (true) {
                 if (!nuixSensorManager.defaultRing.disconnectable()) {
+                    ringIMUJob?.cancel()
+                    ringIMUJob = null
+                    ringTouchRaw?.cancel()
+                    ringTouchRaw = null
                     for (ring in nuixSensorManager.rings()) {
                         if (selectedRingName == null) {
                             selectedRingName = ring.name
@@ -278,6 +288,20 @@ class RingManager @Inject constructor(
                             nuixSensorManager.defaultRing.switchTarget(ring)
                             while (ring.status == NuixSensorState.CONNECTING) {
                                 delay(500)
+                            }
+                            if (ringIMUJob == null) {
+                                ringIMUJob = CoroutineScope(Dispatchers.Default).launch {
+                                    ring.getFlow<RingImuData>(RingSpec.imuFlowName(ring))?.collect {
+                                        sendMessage("imu:${it.data.joinToString(",")}")
+                                    }
+                                }
+                            }
+                            if (ringTouchRaw == null) {
+                                ringTouchRaw = CoroutineScope(Dispatchers.Default).launch {
+                                    ring.getFlow<RingV2TouchRawData>(RingSpec.touchRawFlowName(ring))?.collect {
+                                        sendMessage("touch:${it.data.joinToString(",")}")
+                                    }
+                                }
                             }
                             break
                         }
