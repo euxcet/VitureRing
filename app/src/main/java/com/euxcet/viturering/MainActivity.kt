@@ -1,6 +1,7 @@
 package com.euxcet.viturering
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.graphics.Color
@@ -8,13 +9,16 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
+import android.view.View
 import android.view.WindowManager
 import android.widget.Button
+import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.annotation.RequiresApi
+import androidx.core.content.edit
 import androidx.core.view.children
 import com.euxcet.viturering.utils.LanguageUtils
 import com.euxcet.viturering.utils.Permission
@@ -34,6 +38,9 @@ class MainActivity : ComponentActivity() {
 
     private var overlayView: OverlayView? = null
 
+    private var ipEditText: EditText? = null
+    private var portEditText: EditText? = null
+
     @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,13 +56,52 @@ class MainActivity : ComponentActivity() {
             Manifest.permission.INTERNET,
         ))
         setContentView(R.layout.main)
+        ipEditText = findViewById(R.id.ip)
+        portEditText = findViewById(R.id.port)
         findViewById<TextView>(R.id.toHome).setOnClickListener {
             val intent = Intent(this@MainActivity, HomeActivity::class.java)
             startActivity(intent)
+            ringManager.sendMessage("测试")
         }
         findViewById<TextView>(R.id.calibrate).setOnClickListener {
             ringManager.calibrate()
             Toast.makeText(this, "校准成功", Toast.LENGTH_SHORT).show()
+        }
+        findViewById<Button>(R.id.connect_socket).setOnClickListener {
+            try {
+                val ip = ipEditText?.text.toString()
+                val port = portEditText?.text?.toString()?.toInt() ?: 12345
+                ringManager.startSocketClient(ip, port)
+                val sharedPreferences = getSharedPreferences("RingManager", Context.MODE_PRIVATE)
+                sharedPreferences.edit {
+                    putString("ip", ip)
+                    putString("port", port.toString())
+                }
+                findViewById<Button>(R.id.connect_socket).isEnabled = false
+            } catch (e: Exception) {
+                Log.e("MainActivity", "socket连接失败", e)
+            }
+        }
+        findViewById<Button>(R.id.disconnect_socket).setOnClickListener {
+            ringManager.stopSocketClient()
+        }
+        val sharedPreferences = getSharedPreferences("RingManager", Context.MODE_PRIVATE)
+        ipEditText?.setText(sharedPreferences.getString("ip", ""))
+        portEditText?.setText(sharedPreferences.getString("port", ""))
+        ringManager.setSocketConnectCallback { connected ->
+            runOnUiThread {
+                findViewById<Button>(R.id.connect_socket).isEnabled = true
+                if (connected) {
+                    findViewById<Button>(R.id.connect_socket).visibility = View.GONE
+                    findViewById<Button>(R.id.disconnect_socket).visibility = View.VISIBLE
+                }
+            }
+        }
+        ringManager.setSocketDisconnectCallback {
+            runOnUiThread {
+                findViewById<Button>(R.id.connect_socket).visibility = View.VISIBLE
+                findViewById<Button>(R.id.disconnect_socket).visibility = View.GONE
+            }
         }
     }
 

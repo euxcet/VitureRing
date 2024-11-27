@@ -61,6 +61,54 @@
             android:textColor="#ffffff"
             android:textSize="30sp" />
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ip "
+                android:textColor="#ffffff"
+                android:textSize="24sp"/>
+            <EditText
+                android:id="@+id/ip"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:background="@color/white"
+                android:padding="4dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="port "
+                android:textColor="#ffffff"
+                android:textSize="24sp"/>
+            <EditText
+                android:id="@+id/port"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:padding="4dp"
+                android:background="@color/white"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp">
+            <Button
+                android:id="@+id/connect_socket"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="连接socket"/>
+            <Button
+                android:id="@+id/disconnect_socket"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="断开socket"
+                android:visibility="gone"/>
+        </LinearLayout>
+
         <TextView
             android:id="@+id/textView"
             android:layout_width="wrap_content"

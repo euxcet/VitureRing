@@ -10,6 +10,7 @@ import com.hcifuture.producer.sensor.NuixSensor
 import com.hcifuture.producer.sensor.NuixSensorManager
 import com.hcifuture.producer.sensor.NuixSensorState
 import com.hcifuture.producer.sensor.data.RingTouchData
+import com.hcifuture.producer.sensor.data.RingTouchEvent
 import com.hcifuture.producer.sensor.external.ring.RingSpec
 import com.hcifuture.producer.sensor.external.ring.ringV1.RingV1
 import com.hcifuture.producer.sensor.external.ring.ringV2.RingV2
@@ -17,6 +18,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.io.BufferedReader
+import java.io.InputStreamReader
+import java.io.PrintWriter
+import java.net.Socket
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -27,6 +32,11 @@ class RingManager @Inject constructor(
     private val orientationDetector: OrientationDetector,
     private val wordDetector: WordDetector,
 ) {
+
+    companion object {
+        const val TAG = "RingManager"
+    }
+
     inner class ListenerBuilder {
         internal var touchCallback: ((RingTouchData) -> Unit)? = null
         internal var moveCallback: ((Pair<Float, Float>) -> Unit)? = null
@@ -74,6 +84,128 @@ class RingManager @Inject constructor(
     private lateinit var listener: ListenerBuilder
     var selectedRingName: String? = null
 
+    private var clientSocket: Socket? = null
+    private var input: BufferedReader? = null
+    private var output: PrintWriter? = null
+    private var socketConnectCallback: ((Boolean) -> Unit)? = null
+    private var socketDisconnectCallback: (() -> Unit)? = null
+
+    fun setSocketConnectCallback(callback: ((Boolean) -> Unit)) {
+        socketConnectCallback = callback
+    }
+
+    fun setSocketDisconnectCallback(callback: (() -> Unit)) {
+        socketDisconnectCallback = callback
+    }
+
+    fun startSocketClient(host: String, port: Int) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                if (clientSocket == null || !clientSocket!!.isConnected) {
+                    clientSocket = Socket(host, port)
+                    input = BufferedReader(InputStreamReader(clientSocket?.getInputStream()))
+                    output = PrintWriter(clientSocket?.getOutputStream(), true)
+
+                    // 连接成功回调
+                    socketConnectCallback?.invoke(true)
+
+                    // 缓冲区
+                    val buffer = StringBuilder()
+                    var inMessage = false
+
+                    // 处理接收到的数据
+                    while (true) {
+                        val char = input?.read() ?: -1
+                        if (char == -1) break
+
+                        if (char.toChar() == '[') {
+                            inMessage = true
+                            buffer.clear()
+                        } else if (char.toChar() == ']' && inMessage) {
+                            inMessage = false
+                            val message = buffer.toString()
+                            Log.d("RingManager", "Received message: $message")
+                            // 处理接收到的消息
+                            handleMessage(message)
+                        } else if (inMessage) {
+                            buffer.append(char.toChar())
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Socket connection failed", e)
+                // 连接失败回调
+                socketConnectCallback?.invoke(false)
+            } finally {
+                // 断开连接回调
+                socketDisconnectCallback?.invoke()
+            }
+        }
+    }
+
+    private fun handleMessage(message: String) {
+        try {
+            val splitStrArray = message.split(":")
+            if (splitStrArray.size < 2) {
+                return
+            }
+            val type = splitStrArray[0]
+            when (type) {
+                "gesture" -> {
+                    val gesture = splitStrArray[1]
+                    listener.gestureCallback?.invoke(gesture)
+                }
+
+                "move" -> {
+                    val moveStr = splitStrArray[1]
+                    val posStrArray = moveStr.split(",")
+                    val dx = posStrArray[0].toFloat()
+                    val dy = posStrArray[1].toFloat()
+                    listener.moveCallback?.invoke(Pair(dx, dy))
+                }
+
+                "touch" -> {
+                    val event = splitStrArray[1]
+                    val touchEvent = RingTouchEvent.valueOf(event)
+                    listener.touchCallback?.invoke(
+                        RingTouchData(
+                            data = touchEvent,
+                            timestamp = System.currentTimeMillis()
+                        )
+                    )
+                }
+
+                "plane_event" -> {
+                    val event = splitStrArray[1]
+                    val planeEvent = TouchState.valueOf(event)
+                    listener.planeEventCallback?.invoke(planeEvent)
+                }
+
+                "plane_move" -> {
+                    val dx = splitStrArray[1].toFloat()
+                    val dy = splitStrArray[2].toFloat()
+                    listener.planeMoveCallback?.invoke(Pair(dx, dy))
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "handleMessage fail", e)
+        }
+    }
+
+    fun sendMessage(message: String) {
+        CoroutineScope(Dispatchers.IO).launch {
+            output?.println("[$message]")
+        }
+    }
+
+    fun stopSocketClient() {
+        CoroutineScope(Dispatchers.IO).launch {
+            input?.close()
+            output?.close()
+            clientSocket?.close()
+        }
+    }
+
     fun registerListener(builder: ListenerBuilder.() -> Unit) {
         listener = ListenerBuilder().also(builder)
     }
@@ -114,6 +246,7 @@ class RingManager @Inject constructor(
 
     fun disconnect() {
         nuixSensorManager.defaultRing.disconnect()
+        stopSocketClient()
     }
 
     fun connect() {
