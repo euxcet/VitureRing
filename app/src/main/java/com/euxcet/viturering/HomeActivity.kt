@@ -78,6 +78,10 @@ class HomeActivity : AppCompatActivity() {
                 val intent = Intent(this@HomeActivity, HealthActivity::class.java)
                 startActivity(intent)
             }
+            "demo" -> {
+                val intent = Intent(this@HomeActivity, ObjectActivity::class.java)
+                startActivity(intent)
+            }
 
             else -> {
             }

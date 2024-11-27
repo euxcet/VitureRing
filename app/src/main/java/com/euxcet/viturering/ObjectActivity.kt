@@ -57,12 +57,15 @@ class ObjectActivity : ComponentActivity() {
                             startActivity(intent)
                         }
                         "circle_clockwise" -> {
-                            val intent = Intent(this@ObjectActivity, MainActivity::class.java)
-                            startActivity(intent)
+//                            val intent = Intent(this@ObjectActivity, MainActivity::class.java)
+//                            startActivity(intent)
 //                            val intent = Intent(Intent.ACTION_MAIN)
 //                            intent.addCategory(Intent.CATEGORY_HOME)
 //                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 //                            startActivity(intent)
+                        }
+                        "circle_counterclockwise" -> {
+                            finish()
                         }
                         "touch_ring" -> {
                             overlayView.reset()
