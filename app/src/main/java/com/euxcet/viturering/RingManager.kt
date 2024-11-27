@@ -244,6 +244,7 @@ class RingManager @Inject constructor(
     }
 
     fun calibrate() {
+        wordDetector.start()
         if (nuixSensorManager.defaultRing.target is RingV2) {
             (nuixSensorManager.defaultRing.target as RingV2).calibrate()
         }
@@ -368,7 +369,6 @@ class RingManager @Inject constructor(
         }
 
         // Word
-        wordDetector.start()
         CoroutineScope(Dispatchers.Default).launch {
             wordDetector.gestureFlow.collect {
                 if (::listener.isInitialized) {
