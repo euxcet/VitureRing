@@ -191,6 +191,11 @@ class RingManager @Inject constructor(
                     val dy = splitStrArray[2].toFloat()
                     listener.planeMoveCallback?.invoke(Pair(dx, dy))
                 }
+
+                "plane_character" -> {
+                    val characterList = splitStrArray[1].split(",").toList()
+                    listener.planeCharacterCallback?.invoke(CharacterResult(characterList))
+                }
             }
         } catch (e: Exception) {
             Log.e(TAG, "handleMessage fail", e)
