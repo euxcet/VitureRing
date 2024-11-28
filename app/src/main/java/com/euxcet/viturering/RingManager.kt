@@ -187,8 +187,9 @@ class RingManager @Inject constructor(
                 }
 
                 "plane_move" -> {
-                    val dx = splitStrArray[1].toFloat()
-                    val dy = splitStrArray[2].toFloat()
+                    val posStrArray = splitStrArray[1].split(",")
+                    val dx = posStrArray[0].toFloat()
+                    val dy = posStrArray[1].toFloat()
                     listener.planeMoveCallback?.invoke(Pair(dx, dy))
                 }
 
