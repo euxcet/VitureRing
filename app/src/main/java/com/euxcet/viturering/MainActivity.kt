@@ -27,7 +27,10 @@ import com.hcifuture.producer.sensor.NuixSensor
 import com.hcifuture.producer.sensor.data.RingTouchEvent
 import com.hcifuture.producer.sensor.external.ring.ringV2.RingV2
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -56,8 +59,6 @@ class MainActivity : ComponentActivity() {
             Manifest.permission.INTERNET,
         ))
         setContentView(R.layout.main)
-        ipEditText = findViewById(R.id.ip)
-        portEditText = findViewById(R.id.port)
         findViewById<TextView>(R.id.toHome).setOnClickListener {
             val intent = Intent(this@MainActivity, HomeActivity::class.java)
             startActivity(intent)
@@ -67,6 +68,48 @@ class MainActivity : ComponentActivity() {
             ringManager.calibrate()
             Toast.makeText(this, "校准成功", Toast.LENGTH_SHORT).show()
         }
+
+        val redPPGButton = findViewById<Button>(R.id.red_ppg)
+        val greenPPGButton = findViewById<Button>(R.id.green_ppg)
+        redPPGButton.setOnClickListener {
+            it as Button
+            if (it.text.contains("START")) {
+                CoroutineScope(Dispatchers.Default).launch {
+                    if (ringManager.defaultRing().target is RingV2) {
+                        (ringManager.defaultRing().target as RingV2).openRedPPG()
+                    }
+                }
+                it.text = "PPG RED STOP"
+            } else {
+                CoroutineScope(Dispatchers.Default).launch {
+                    if (ringManager.defaultRing().target is RingV2) {
+                        (ringManager.defaultRing().target as RingV2).closeRedPPG()
+                    }
+                }
+                it.text = "PPG RED START"
+            }
+        }
+        greenPPGButton.setOnClickListener {
+            it as Button
+            if (it.text.contains("START")) {
+                CoroutineScope(Dispatchers.Default).launch {
+                    if (ringManager.defaultRing().target is RingV2) {
+                        (ringManager.defaultRing().target as RingV2).openGreenPPG()
+                    }
+                }
+                it.text = "PPG RED STOP"
+            } else {
+                CoroutineScope(Dispatchers.Default).launch {
+                    if (ringManager.defaultRing().target is RingV2) {
+                        (ringManager.defaultRing().target as RingV2).closeGreenPPG()
+                    }
+                }
+                it.text = "PPG RED START"
+            }
+        }
+        /*
+        ipEditText = findViewById(R.id.ip)
+        portEditText = findViewById(R.id.port)
         findViewById<Button>(R.id.connect_socket).setOnClickListener {
             try {
                 val ip = ipEditText?.text.toString()
@@ -103,6 +146,7 @@ class MainActivity : ComponentActivity() {
                 findViewById<Button>(R.id.disconnect_socket).visibility = View.GONE
             }
         }
+         */
     }
 
     override fun onResume() {
@@ -144,6 +188,8 @@ class MainActivity : ComponentActivity() {
         val gestureView = findViewById<TextView>(R.id.gestureView)
         val statusView = findViewById<TextView>(R.id.statusView)
         val ringLayout = findViewById<LinearLayout>(R.id.ringLayout)
+        val hrView = findViewById<TextView>(R.id.hr_data)
+        val spo2View = findViewById<TextView>(R.id.spo2_data)
         ringManager.registerListener {
             onConnectCallback { // Connect
                 runOnUiThread {
@@ -203,6 +249,14 @@ class MainActivity : ComponentActivity() {
                         }
                         else -> {}
                     }
+                }
+            }
+
+            onPPGCallback {
+                if (it.type == 0) { // heart rate
+                    hrView.text = "HR:${it.raw[0]}"
+                } else if (it.type == 4) { // spo2
+                    spo2View.text = "SPO2:${it.raw[0]}"
                 }
             }
         }

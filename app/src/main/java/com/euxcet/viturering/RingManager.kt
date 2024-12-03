@@ -8,10 +8,12 @@ import com.hcifuture.producer.detector.TouchState
 import com.hcifuture.producer.detector.WordDetector
 import com.hcifuture.producer.sensor.NuixSensor
 import com.hcifuture.producer.sensor.NuixSensorManager
+import com.hcifuture.producer.sensor.NuixSensorProxy
 import com.hcifuture.producer.sensor.NuixSensorState
 import com.hcifuture.producer.sensor.data.RingImuData
 import com.hcifuture.producer.sensor.data.RingTouchData
 import com.hcifuture.producer.sensor.data.RingTouchEvent
+import com.hcifuture.producer.sensor.data.RingV2PPGData
 import com.hcifuture.producer.sensor.data.RingV2TouchRawData
 import com.hcifuture.producer.sensor.external.ring.RingSpec
 import com.hcifuture.producer.sensor.external.ring.ringV1.RingV1
@@ -49,6 +51,7 @@ class RingManager @Inject constructor(
         internal var planeEventCallback: ((TouchState) -> Unit)? = null
         internal var planeMoveCallback: ((Pair<Float, Float>) -> Unit)? = null
         internal var planeCharacterCallback: ((CharacterResult) -> Unit)? = null
+        internal var ppgCallback: ((RingV2PPGData) -> Unit)? = null
 
         fun onTouchCallback(callback: ((RingTouchData) -> Unit)) {
             touchCallback = callback
@@ -80,6 +83,10 @@ class RingManager @Inject constructor(
 
         fun onPlaneCharacterCallback(callback: ((CharacterResult) -> Unit)) {
             planeCharacterCallback = callback
+        }
+
+        fun onPPGCallback(callback: ((RingV2PPGData) -> Unit)) {
+            ppgCallback = callback
         }
     }
 
@@ -256,6 +263,10 @@ class RingManager @Inject constructor(
         }
     }
 
+    fun defaultRing(): NuixSensorProxy {
+        return nuixSensorManager.defaultRing
+    }
+
     fun disconnect() {
         nuixSensorManager.defaultRing.disconnect()
         stopSocketClient()
@@ -395,6 +406,17 @@ class RingManager @Inject constructor(
             wordDetector.characterFlow.collect {
                 if (::listener.isInitialized) {
                     listener.planeCharacterCallback?.invoke(it)
+                }
+            }
+        }
+
+        CoroutineScope(Dispatchers.Default).launch {
+            val ring = nuixSensorManager.defaultRing
+            ring.getProxyFlow<RingV2PPGData>(
+                RingSpec.ppgFlowName(ring)
+            )?.collect {
+                if (::listener.isInitialized) {
+                    listener.ppgCallback?.invoke(it)
                 }
             }
         }
