@@ -13,6 +13,7 @@ import androidx.core.view.WindowInsetsCompat
 import com.euxcet.viturering.databinding.ActivityHealthBinding
 import com.euxcet.viturering.utils.LanguageUtils
 import com.hcifuture.producer.sensor.data.RingTouchEvent
+import com.hcifuture.producer.sensor.external.ring.ringV2.RingV2
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -26,6 +27,8 @@ import javax.inject.Inject
 class HealthActivity : AppCompatActivity() {
 
     companion object {
+        const val TAG = "HealthActivity"
+
         const val MODE_HEART_RATE = 1
         const val MODE_BLOOD_OXYGEN = 2
     }
@@ -108,17 +111,42 @@ class HealthActivity : AppCompatActivity() {
     }
 
     private fun beginHeartRateDetect() {
-        // TODO
-        startMockJob()
+        CoroutineScope(Dispatchers.Default).launch {
+            withContext(Dispatchers.Main) {
+                binding.waveView.setMaxValue(250)
+                binding.waveView.setWaveLineWidth(30)
+                binding.waveView.showLine(0f)
+                onReceiveData(0)
+            }
+            if (ringManager.defaultRing().target is RingV2) {
+                (ringManager.defaultRing().target as RingV2).openGreenPPG()
+            }
+        }
     }
 
     private fun beginBloodOxygenDetect() {
-        // TODO
-        startMockJob()
+        CoroutineScope(Dispatchers.Default).launch {
+            withContext(Dispatchers.Main) {
+                binding.waveView.setMaxValue(120)
+                binding.waveView.setWaveLineWidth(30)
+                binding.waveView.showLine(0f)
+                onReceiveData(0)
+            }
+            if (ringManager.defaultRing().target is RingV2) {
+                (ringManager.defaultRing().target as RingV2).openRedPPG()
+            }
+        }
     }
 
     private fun cancelDetect() {
-        mockDataJob?.cancel()
+        CoroutineScope(Dispatchers.Default).launch {
+            if (ringManager.defaultRing().target is RingV2) {
+                (ringManager.defaultRing().target as RingV2).apply {
+                    closeRedPPG()
+                    closeGreenPPG()
+                }
+            }
+        }
     }
 
     override fun onStart() {
@@ -128,7 +156,7 @@ class HealthActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        mockDataJob?.cancel()
+        cancelDetect()
     }
 
     private fun onReceiveData(value: Int) {
@@ -194,18 +222,29 @@ class HealthActivity : AppCompatActivity() {
                         }
 
                         RingTouchEvent.TAP -> {
-                            if (mode > 0) {
-                                switchMode(0)
-                            } else {
-                                when (focusedPosition) {
-                                    0 -> switchMode(MODE_HEART_RATE)
-                                    1 -> switchMode(MODE_BLOOD_OXYGEN)
-                                }
-                            }
+//                            if (mode > 0) {
+//                                switchMode(0)
+//                            } else {
+//                                when (focusedPosition) {
+//                                    0 -> switchMode(MODE_HEART_RATE)
+//                                    1 -> switchMode(MODE_BLOOD_OXYGEN)
+//                                }
+//                            }
                         }
 
                         else -> {}
 //                    }
+                    }
+                }
+            }
+            onPPGCallback {
+                runOnUiThread {
+                    Log.e(TAG, "PPG, type: ${it.type}, data: ${it.raw[0]}")
+                    if (it.type == 0 && mode == MODE_HEART_RATE) {
+                        onReceiveData(it.raw[0].toInt())
+                    }
+                    if (it.type == 4 && mode == MODE_BLOOD_OXYGEN) {
+                        onReceiveData(it.raw[0].toInt())
                     }
                 }
             }
